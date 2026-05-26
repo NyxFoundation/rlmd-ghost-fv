@@ -1,0 +1,12 @@
+### Statement (line 688)
+Proposition 1. Suppose that all honest voters of slot t −1 vote for a descendant of block B. Then, B is in
+the canonical chain of all active validators in rounds {3∆t, 3∆t + ∆}. In particular, all honest voters of slot
+t vote for descendants of B.
+We now show that, if Proposition 1 holds for an execution, then the execution satisﬁes reorg resilience.
+The idea is the following: by the view-merge property (Lemma 1), all active validators vote for honest
+proposals, and Proposition 1 ensures that this keeps holding also in future slots. We prove this result in the
+following theorem, which immediately implies that a protocol is τ-reorg-resilient if Proposition 1 holds for it
+in the τ-sleepy model.
+
+### Proof (line 0)
+(stated as a property; no direct proof here — established per protocol, e.g. for RLMD-GHOST by Lemma 4, and for Goldfish-style protocols in Sec. 4)

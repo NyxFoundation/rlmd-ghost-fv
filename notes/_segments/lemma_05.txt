@@ -1,0 +1,23 @@
+### Statement (line 1603)
+Lemma 5. Suppose network synchrony holds for rounds [3∆t + ∆, 3∆t + 2∆], and that an honest validator
+fast conﬁrms block B at slot t. Suppose also that, in the view of any active validator at slot t + 1, <
+n
+validators are seen as equivocators. Then, all honest voters of slot t + 1 vote for descendants of B.
+
+### Proof (line 1608)
+Proof. Upon fast conﬁrming B at round 3∆t+∆, the honest validator broadcasts B and all votes ≥2
+3n votes
+which are responsible for the fast conﬁrmation, so that they are in the view of all awake validators at round
+3∆t + 2∆, by synchrony. Therefore, they are also in the view of all active validators at round 3∆(t + 1) + ∆.
+Consider one such view V. By assumption, < n
+3 validators are seen as equivocators in V, so over n
+3 out of
+the 2
+3n votes are not discounted. Since they are from slot t, they are latest votes, and are the ones which
+count for the respective validators. Therefore, w(B, FILulmd(V, t + 1).V) > n
+3 . On the other hand, V contains
+at most n
+3 votes from slot t, conﬂicting with B and by a validator which is not seen as an equivocator in V.
+Therefore, w(B′, FILulmd(V, t+1).V) ≤n
+3 for any B′ conﬂicting with B, so B is canonical in V, and an active
+validator with view V votes for a descendant of B.

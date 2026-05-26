@@ -1,0 +1,12 @@
+### Statement (line 772)
+Lemma 3. Let V be a view in which over a majority of the votes are for a descendant of a block B. Then,
+GHOST(V, t) is a descendant of B, i.e., B is in the canonical chain output by the GHOST fork-choice.
+
+### Proof (line 774)
+Proof. Let M be all votes in V. Consider any height less than or equal to the height of B. In any fork at
+such a height, there is one branch that contains B, and thus also the whole sub-tree rooted at B. Say the
+block on that branch at that height is B′, and consider any competing sibling B′′. Since over a majority of
+the votes in M are for the sub-tree rooted at B, and all votes on the sub-tree rooted at B′ are not votes on
+the sub-tree rooted at B′′, w(B′, M) > |M|
+> w(B′′, M). Thus, B′ is selected by the GHOST fork-choice
+algorithm at that height. Therefore, B ⪯GHOST(V, t).

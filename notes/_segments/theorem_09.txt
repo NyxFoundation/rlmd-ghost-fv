@@ -1,0 +1,36 @@
+### Statement (line 1284)
+Theorem 9. RLMD-GHOST is not τ-reorg-resilient for any 1 ≤τ < η.
+
+### Proof (line 1285)
+Proof. We prove this theorem with an example. Let us consider a validator set of size n = 2m+1, partitioned
+in three sets, V1, V2, and V3, with V1 = {v1}, |V2| = m + 1, |V3| = m −1. Validators in V2 and V3 are all
+initially honest, while v1 is adversarial. Let t −1 and t be two adversarial slots, i.e., controlled by v1. In slot
+t, validator v1 publishes conﬂicting blocks A and B, one as a proposal for slot t −1 and the other for slot
+t. By round 3∆t + ∆, the adversary delivers only A to validators in V2, and only B to validators in V3, so
+that the former vote for A and the latter for B in slot t. At this point, the adversary puts all validators in
+V3 to sleep, and then does nothing until slot t + η −1. Meanwhile, validators in V2 keep voting for A, since
+V2 contains m + 1 > n
+2 validators, so A stays canonical in all of the views of every member of V2. Suppose in
+particular that the proposer of slot t + 1 is in V2, so that it makes a proposal C extending A. We now show
+that the adversary can induce a reorg of C, exploiting the votes of the asleep validators V3, so that reorg
+resilience is not satisﬁed in this execution. We then only have to show that the execution is τ-compliant, in
+order to show that the protocol is not τ-reorg-resilient.
+At the voting round 3∆(t + η −1) + ∆, the adversary votes for B with v1. After the voting round,
+it corrupts two validators v2, v3 ∈V2, and starts voting for B with them, broadcasting late votes for slot
+t + η −1. These votes are delivered to all awake validators by round 3∆(t + η −1) + 2∆, and are therefore
+in all of their views at the voting round of slot t + η. The votes of v2 and v3 are equivocations, so they are
+discounted, both for B and for A. Slot t is in [t, t + η), the expiration period for slot t + η, so the votes of
+V3 count at this slot. Therefore, in all views of the remaining honest validators in V2, B has m votes, i.e.,
+those of V3 and v1, and descendants of A only m −1, because two have been discounted. B is then canonical
+in such views, and reorg resilience (of C) is violated. The adversary does not perform any more corruptions
+nor puts to sleep any more validators, and does not wake up validators in V3.
+We now show that this execution is τ-compliant. For any slot s, we show that τ-sleepiness holds at slot s,
+i.e., that Equation 1 holds. For any slot s ≤t + 1, this is clear, because we have |Hs−1| = |V2 ∪V3| = 2m >
+1 = |V1| = |As∪(Hs−τ,s−2\Hs−1)|. For any slot s ∈[t+2, t+η−1], we have Hs−1 = V2 and As = V1, because
+the two corruptions only happen after round 3∆(t + η −1) + ∆. Therefore, |Hs−1| = |V2| = m + 1 > m =
+|V1∪V3| ≥|As∪(Hs−τ,s−2\Hs−1)|, so τ-sleepiness is satisﬁed. For any slot s ≥t+η, we have As = {v1, v2, v3},
+V2\{v2, v3} ⊆Hs−1 and Hs−τ,s−2\Hs−1 = ∅, because η > τ implies s−τ ≥t+η−τ > t, so V3∩Hs−τ,s−2 = ∅.
+τ-sleepiness is then satisﬁed, because |Hs−1| ≥m−1 > 3 = |As| = |As∪Hs−τ,s−2\Hs−1|. Since the execution
+is τ-compliant, but does not satisfy reorg resilience, the protocol is not τ-reorg-resilient.
+The second limitative result we present concerns dynamic availability. Unsurprisingly, an expiry period
+η > τ means that RLMD-GHOST is also not τ-dynamically-available.

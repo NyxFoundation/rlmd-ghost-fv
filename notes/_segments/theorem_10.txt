@@ -1,0 +1,70 @@
+### Statement (line 1319)
+Theorem 10. RLMD-GHOST is not τ-dynamically-available for any 1 ≤τ < η and for any conﬁrmation
+rule with Tconf < ⌊n−5
+4 ⌋η = O(η · n) slots. In particular, it is not τ-dynamically available with the κ-deep
+conﬁrmation rule, for κ < ⌊n−5
+4 ⌋η.
+
+### Proof (line 1324)
+Proof. Consider a validator set of size n = 2m + 1, partitioned in three sets, C0, A0, and S0, standing for
+corrupted, active, and sleepy, respectively, with C0 = {v1}, |A0| = m + 2, |S0| = m −2. Validators in A0 and
+S0 are all initially honest, while v1 is adversarial. Let t −1 and t be two adversarial slots, i.e., controlled by
+v1. In slot t, validator v1 publishes conﬂicting blocks A and B, one as a proposal for slot t −1 and the other
+for slot t. By round 3∆t + ∆, the adversary delivers only A to validators in A0, and only B to validators in
+S0, so that the former vote for A and the latter for B in slot t.
+At this point, the adversary puts all validators in S0 to sleep, and then does nothing until immediately
+after round 3∆(t + η −2) + ∆, i.e., the voting round of slot t + η −2, at which point it corrupts two
+validators {v2, v3} ∈A0. Up until this point, all validators in A0 have kept voting for A, since |A0| =
+m + 2 > n
+2 validators. At slot t + η −1, the adversarial validators initially do not broadcast votes. By round
+3∆(t + η −1) + 2∆, the adversary wakes up validators in S0, so that they are active in slot t + η. At slot
+t + η, the adversary publishes three votes for B from slot t + η −1, from validators {v1, v2, v3}. By round
+3∆(t+ η)+ ∆, it delivers these only to validators in A0. Since the expiration period [t, t+ η −1] for slot t+ η
+contains t, the votes of S0 count at slot t + η. Therefore, in the views of the validators in S0 at slot t + η,
+descendants of A have a total of m + 2 votes, from all validators in A0, including the newly corrupted ones,
+while B only has m −2 votes from S0. Thus, A is canonical in their views, and they vote for it. The views
+of the m remaining honest validators in A0 also include the three adversarial votes for B from slot t + η −1,
+so descendants of A only have m votes, while B has m + 1. B then is canonical in their views, and they vote
+for it. The three adversarial validators also do so, so B receives m + 3 votes and is canonical in the following
+slots. After the voting round of slot t + η, the adversary then puts all but two of the m −2 validators in S0
+to sleep.
+In slot t+η+1, there are then m+2 active validators: the two which are still active from S0, and m which
+are still honest from A0. There are also three adversarial validators and m−4 validators from S0 asleep from
+the previous slot. We are therefore in the same situation as in slot t+1, except we have two more adversarial
+validators (from A0) and two less asleep validators (from S0). We let C1 be the three adversarial validators,
+A1 be the m + 2 active validators and S1 be the m −4 asleep validators. The adversary repeats the same
+pattern. It corrupts two more validators from A1 after the voting round of slot (t + η) + (η −2) = t + 2η −2,
+and at round 3∆(t + 2η −1) + 2∆wakes up all validators in S0 so that they are active by slot t + 2η. It then
+votes with all of the ﬁve adversarial validators for the branch of A at slot t + 2η −1, but delivers such votes
+only to validators in A1 by the voting round of slot t + 2η. Then, at slot t + 2η, the branch of A has m + 1
+votes in the views of validators in A1, i.e., the adversarial votes plus the votes from the m −4 validators in
+S1, which were put to sleep after voting for A at slot t + η. Therefore, it is canonical in their views and they
+vote for it, and so does the adversary. On the other hand, the views of validators in S1 at that round do not
+include the adversarial votes for A, and so all validators in S1 vote for B.
+All but four of them are now put to sleep, so that at slot t + 2η + 1 there are m + 2 active validators,
+m −6 asleep validators and ﬁve adversarial validators. We let these new sets of validators be A2, S2, C2,
+respectively. Again, the adversary has reorged from one branch to the other, while only needing to corrupt
+two asleep validators into two adversarial validators, and while otherwise preserving the same setup. They
+can repeat this until the number of adversarial validators reaches m −1, which does not allow for two
+additional corruptions. After the kth reorg, at slot t + kη + 1, there are m + 2 active validators Ak, 2k + 1
+adversarial validators Ck, and m −2(k + 1) asleep validators Sk. Therefore, the adversary can repeat this
+up to k ≤⌊m−2
+2 ⌋= ⌊n−5
+4 ⌋times. Each time they do so, they can reorg from one branch to the other after
+η slots, for a total of ⌊n−5
+4 ⌋η slots. By assumption, Tconf < ⌊n−5
+4 ⌋η slots. If no conﬁrmation has been made
+after Tconf slots, then liveness is violated. If one has been made, then the conﬁrmed block can still be reorged
+by slot ⌊n−5
+4 ⌋η, and the conﬂicting branch eventually conﬁrmed afterwards, violating safety.
+To complete the proof, we only need to verify that τ-sleepiness is satisﬁed. For slots s ≤t, we have
+|Hs−1| = 2m > 1 = |As ∪(Hs−τ,s−2 \ Hs−1)|, so it is indeed satisﬁed. Consider now some 1 ≤k ≤m−2
+2 ,
+and slots [t + (k −1)η + 1, t + kη]. For s ∈[t + (k −1)η + 1, t + kη −1], we have |Hs−1| ≥|Ak| = m + 2,
+|As| ≤|Ck| = 2k+1 and |Hs−τ,s−2\Hs−1| = |Sk−1| = m−2k, so |Hs−1| ≥m+2 > m+1 = (2k+1)+(m−2k) ≥
+|As ∪(Hs−τ,s−2 \ Hs−1)|, and τ-sleepiness at slot s is satisﬁed. For s = t + kη, we have |Hs−1| = m, because
+two more validators have been corrupted, |As| = |Ck| = 2k + 1, and Hs−τ,s−2 \ Hs−1 = ∅, because τ < η
+implies s −τ = t + kη −τ > t + (k −1)η, which is the last slot in which Sk−1 were active . Since 2k + 2 ≤m,
+we have that 2k + 1 < m, so τ-sleepiness at slot t + kη is indeed satisﬁed. In slots after the last reorg, all
+honest validators are active, and there are ≥m + 2 > n
+2 of them, so τ-sleepiness is also satisﬁed.

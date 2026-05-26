@@ -1,0 +1,17 @@
+### Statement (line 1643)
+Theorem 14 (Liveness of fast conﬁrmations). An honest proposal B from a slot t after GST + ∆in which
+|Ht| ≥2
+3n and network latency is ≤∆
+2 is fast conﬁrmed by all active validators at round 3∆t + ∆.
+
+### Proof (line 1647)
+Proof. Firstly, note that validators in Ht are active in all rounds [3∆(t1) + 2∆, 3∆t + ∆], because falling
+asleep at any point in those rounds would force them to go through the joining protocol again, and thus they
+would not be active prior to at least round 3∆t + 2∆. Since network latency is ≤∆
+2 , all validators in Ht
+receive the honest proposal by round 3∆t + ∆
+2 . By the view-merge property, Lemma 1, they all vote for B.
+Again by the assumption on network latency, they all receive such votes by round 3∆t + ∆, at which point
+they are merged into their views. Therefore, all of their views contain |Ht| ≥2
+3n votes for B from slot t, and
+B is fast conﬁrmed.

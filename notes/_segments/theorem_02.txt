@@ -1,0 +1,38 @@
+### Statement (line 715)
+Theorem 2 (Dynamic-availability). An execution of a propose-vote-merge protocol satisfying reorg resilience
+also satisﬁes security with overwhelming probability with Tconf = 2κ slots. In particular, τ-reorg-resilience
+implies τ-dynamic-availability.
+
+### Proof (line 718)
+Proof. Theorem 1 and Lemma 2 imply security (Deﬁnition 4) with overwhelming probability, as we now
+explain. For a round r, denote by slot(r) the slot to which that round belongs. We show liveness with
+conﬁrmation time Tconf = 2κ slots. Consider a round r, with t = slot(r), a round r′ with t′ = slot(r′) ≥t+2κ,
+and an honest validator vi active at round r′. By Lemma 2, w.o.p, there exists a pivot slot t′′ ∈[t + 1, t + κ].
+By Theorem 1, the proposal B from slot t′′ is in the canonical chain of all active validators in later slots, so
+in particular it is in chr′
+i . Since t′′ ≤t + κ ≤t′ −κ, B is κ-deep in chr′
+i , and so it is in the conﬁrmed chain
+Chr′
+i as well.
+To show safety, let us consider any two rounds r′ ≥r, and any two honest validators vi and vj, active
+at rounds r and r′, respectively. Let also t = slot(r). Lemma 2 implies that w.o.p. there is at least a pivot
+slot t′ ∈[t −κ, t), and by Theorem 1 its proposal B is canonical in all active views from round 3∆t′ + ∆.
+Therefore, B is in the canonical chain of vi at round r and, since it is from a slot ≥t −κ, Chr
+i ⪯B. Block
+B is also in the canonical chain of vj at round r′, i.e., either B ⪯Chr′
+j
+or Chr′
+j
+⪯B. In the ﬁrst case,
+Chr
+i ⪯B ⪯Chr′
+j . In the second case, we have both Chr
+i ⪯B and Chr′
+j ⪯B. Therefore, Chr
+i and Chr′
+j cannot
+be conﬂicting, it follows that either Chr
+i ⪯Chr′
+j or Chr′
+j ⪯Chr
+i .

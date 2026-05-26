@@ -1,0 +1,22 @@
+### Statement (line 696)
+Theorem 1 (Reorg resilience). Let us consider an execution of a propose-vote-merge protocol in which
+Proposition 1 holds. Then, this execution satisﬁes reorg resilience.
+
+### Proof (line 698)
+Proof. Consider a honest proposal B from slot t. We prove reorg resilience by induction on the slot. Note
+that validators only ever update their canonical chain at rounds {3∆s, 3∆s + ∆}, for all slots s ≥t, upon
+computing the fork-choice. Therefore, the following statement holding for all s ≥t is suﬃcient for reorg
+resilience, as it implies that B is canonical in all rounds ≥3∆t + ∆.
+Induction hypothesis: B is canonical in the views of active validators at rounds r ∈{3∆s, 3∆s + ∆},
+for a slot s ≥t and r ≥3∆t + ∆.
+Base case: The proposal slot t. Lemma 1 applies and implies that all honest voters at slot t vote for B,
+which is in particular canonical in their views.
+Inductive step: Suppose now that the statement holds for s ≥t. In particular, all honest voters of slot s
+vote for a descendant of B, because it is canonical in their view in the voting round 3∆s + ∆. Proposition 1
+then implies the desired statement for s + 1.
+If an execution satisﬁes reorg resilience we obtain that, by applying the same arguments as in [7], the
+κ-deep conﬁrmation rule is secure in it, in the sense that the conﬁrmed chain satisﬁes Deﬁnition 4.
+In
+particular, τ-reorg resilience implies τ-dynamic-availability. Because of Thereom 1, we then only need to
+show that Proposition 1 holds for τ-compliant executions in order to show that a protocol is τ-dynamically-
+available.

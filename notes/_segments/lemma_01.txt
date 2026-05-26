@@ -1,0 +1,18 @@
+### Statement (line 625)
+Lemma 1. Suppose that t is a pivot slot. Then, all honest voters of slot t, i.e., Ht, vote for the honest
+proposal B of slot t.
+
+### Proof (line 627)
+Proof. Let Vp ∪{B} be the view proposed with block B by vp, the honest proposer of slot t, i.e., Vp is the
+view of vp at round 3∆t. Since vp is honest, B extends FC(Vp, t), and thus FC(Vp ∪{B}, t) = B by the
+consistency property (see Section 2) of FC.
+Consider an honest voter of slot t, i.e., a validator vi ∈Ht, and let Vi be its view at round 3∆t + ∆,
+before merging Vi with the proposed view Vp ∪{B}. Observe that, since vi is active in round 3∆t + ∆, it
+must has already been awake at round 3∆(t −1) −2∆, because otherwise it would need to follow the joining
+protocol until round 3∆t + 2∆, and would thus not currently be active.
+Therefore, vi was already active at round 3∆(t −1) −2∆, and in particular it merged its buﬀer Bi in its
+local view then. So, Vi is the view that vi had after merging the buﬀer Bi. So, messages in Vi are delivered
+to the proposer by round 3∆t, so Vi ⊆Vp.
+The proposal message is received by vi before voting. Then, vi merges the proposed view Vp∪{B} with its
+view Vi, resulting in the view Vi ∪(Vp ∪{B}) = Vp ∪{B}. Validator vi votes for the output of its fork-choice
+at round 3∆t + ∆, which is FC(Vp ∪{B}, t) = B.

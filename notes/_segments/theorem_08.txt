@@ -1,0 +1,34 @@
+### Statement (line 1050)
+Theorem 8 (Asynchrony resilience). RLMD-GHOST is (η, η −1)-asynchrony-resilient.
+
+### Proof (line 1051)
+Proof. Consider an (η, η −1)-compliant execution, with a (η −1)-tpa (t1, t2), and an honest proposal B from
+a slot t ≤t1 after GST + ∆. First, since synchrony holds for slots [t, t1], and thus network synchrony holds
+until round 3∆t1 + 2∆, all the properties of RLMD-GHOST hold until then, including reorg resilience. In
+particular, starting from round ≥3∆t + ∆, B is in the canonical chain of all active validators in those slots,
+as they coincide with the aware validators. We then only need to consider aware validators at slots s > t1.
+Suppose B is in the canonical chain of all aware validators at all slots < s. In particular, B ⪯chr
+i for a
+validator vi ∈Ht1 which is active at a round r ∈[3∆t1 + ∆, 3∆(s −1) + ∆], because validators in Ht1 are
+always aware when active. Therefore, validators in Ht1 \ As only ever broadcast votes for descendants of B
+in slots [t1, s −1].
+Consider ﬁrst the case s ∈(t1, t2]. Then, the aware validators at a round r ∈{3∆s, 3∆s + ∆} are exactly
+the validators Ht1 which are active in r. Consider then such a validator vi ∈Ht1, and its view Vi at round
+r. View Vi contains all honest votes from slot t1 because, by deﬁnition of (η −1)-tpa, vi was awake at round
+3∆t1 + 2∆, at which point it received all honest votes from slot t1 and merged them into its view. Such votes
+are not expired at slot s, since t2 −t1 ≤η −1 implies t1 > t2 −η ≥s −η, i.e., t1 is within the expiry period
+[s −η, s −1] for slot s. All validators in Ht1 \ As are not equivocators in Vi, since they are not corrupted by
+round 3∆s + ∆. Therefore, their latest votes in Vi all count for a descendant of B in Vi. The other votes
+which are counted in Vi are those from As and Hs−η,s−1 \ Ht1. Since the execution is (η, η −1)-compliant,
+we have |Ht1 \ As| > |As ∪(Hs−η,s−1 \ Ht1)|, and thus B is canonical in Vi.
+Consider now the case s = t2 + 1. Now, aware views coincide with active views, so we let Vj be the view
+of an active validator vj at a round r ∈{3∆(t2 + 1), 3∆(t2 + 1) + ∆}. Since synchrony holds from slot t2,
+view Vj contains all latest votes from Ht1 \ At2+1, which are all from slots [t1, t2], and thus for descendants
+of B by assumption. Moreover, t1 ≥t2 −(η −1) = (t2 + 1) −η, so all such votes are not expired at slot
+t2 + 1. We can again conclude that B is canonical in Vj, because |Ht1| > |As ∪(Hs−η,s−1 \ Ht1)| holds for
+s = t2 + 1 as well.
+Finally, suppose s > t2 + 1. Since aware and active views coincide at slot s −1, B is canonical in all
+active views at slot s −1 by assumption, so all honest votes from slot s −1 are for a descendant of B. Since
+synchrony holds as well, we can apply 1 and conclude that B is canonical at all active views at slot s.
+For RLMD-GHOST with η ≤2, Theorem 8 does not say anything, because a π-tpa is empty for π ≤1.
+For η = 1, this is entirely to be expected, given the limitations of Goldﬁsh in this sense.

@@ -1,0 +1,5 @@
+### Statement (line 1048)
+Theorem 6 (Reorg resilience). RLMD-GHOST is η-reorg-resilient.
+
+### Proof (line 0)
+(follows from Lemma 4 via Theorem 1; no separate proof — see ll. 1045-1047)

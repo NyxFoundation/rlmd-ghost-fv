@@ -1,0 +1,23 @@
+### Statement (line 857)
+Theorem 3 (Strong reorg resilience). Consider an honest proposal B from a slot t in which network syn-
+chrony hold and | eHt| > n
+2 . Suppose that validators in eHt do not fall asleep in rounds [3∆t + ∆, 3∆t + 2∆].
+Then, B is always canonical in all honest views which contain all slot t votes from eHt.
+7The Ethereum protocol has (disjoint) committees of (the whole set of) validators voting in each slot, i.e., it implements
+subsampling. Neither proposer boost nor view-merge can fully prevent ex-ante reorgs in that setting, leading to a protocol with
+diﬀerent security guarantees than what is described here. In particular the LMD-GHOST protocol implemented in Ethereum is
+not a reorg resilient protocol, even in the full participation setting.
+
+### Proof (line 867)
+Proof. By Lemma 1, all honest voters of slot t broadcast a vote for B at round 3∆t + ∆. Synchrony in the
+subsequent ∆rounds means that all such votes are received by those same validators before they merge their
+buﬀers, since by assumption they do not fall asleep. Those votes are then in all of their views by the end of
+slot t and the result follows.
+On the other hand LMD-GHOST is signiﬁcantly limited in its support of dynamic participation, as shown
+in the following theorem. In particular, we present a scenario in which the adversary is able to cause a reorg
+of a conﬁrmed block, compromising τ-safety and, consequently, τ-dynamic-availability, while never violating
+τ-sleepiness. The reason why this attack is possible is due to the fact that τ-sleepiness only considers votes
+from the last τ slots, but LMD-GHOST does not have vote expiry, so all votes are relevant to the fork-
+choice. Since the ∞-sleepy model allows only an extremely restrictive form of dynamic participation, almost
+equivalent to requiring | eHt| > n
+2 at all times, this is a fairly strong limitative result.

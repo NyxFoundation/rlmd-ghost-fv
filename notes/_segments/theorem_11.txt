@@ -1,0 +1,31 @@
+### Statement (line 1388)
+Theorem 11. RLMD-GHOST with ﬁnite η is not (τ, π)-asynchrony-resilient for any τ > π ≥max(η, 2), nor
+for τ = π = ∞.
+
+### Proof (line 1390)
+Proof. We have to show that RLMD-GHOST is not asynchrony resilient for any τ > π ≥η, which we
+do by showing that RLMD-GHOST is not (∞, π)-asynchrony-resilient, by constructing an (∞, η)-compliant
+execution in which asynchrony-resilience does not hold. Since Eτ,π is monotonically decreasing in τ and
+monotonically increasing in π, E∞,η ⊂Eτ,π for any τ > π ≥η, and similarly E∞,η ⊂E∞,∞, so the desired
+result follows.
+We consider a validator set {v1, v2, v3}, where all validators are honest at all times, and
+consider an execution with a η-tpa (t, t + η), which is ̸= ∅since η ≥2. In particular, network synchrony does
+not hold at slot t + η −1. Before round 3∆(t + η −1) + 2∆, validator v3 is asleep. It wakes up at that round,
+and stays awake thereafter, so v3 ∈Hs for s ≥t + η. Both validators v1 and v2 are active at all rounds
+≤3∆t + 2∆, so Hs = {v1, v2} for s ≤t. Validator v1 subsequently falls asleep, and only wakes up again in
+round 3∆(t + η) + 2∆, while validator v2 is always awake. Upon waking up at round 3∆(t + η −1) + 2∆,
+validator v3 does not see any message before merging the buﬀer into its view, due to asynchrony. Validator v3
+is the proposer of slot t + η, and, due to the lack of messages in its view, it proposes a block B extending
+Bgenesis, which conﬂicts with all previous honest proposals. Validator v3 then also votes for B at slot t + η,
+while v2 does not. All three honest validators are active at round 3∆(t + η) + 2∆, so they receive these votes
+and merge them into their view. The latest vote from v1 is from slot t, and is expired at slot t + η + 1.
+Therefore, the only unexpired latest votes at the voting round of slot t + η + 1 are those from v2 and v3
+from slot t + η. If B wins the tiebreaker, it is then canonical in the views of the three validators. All honest
+proposals from slots ≤t are then not canonical in these active views, which are also aware views since we
+are at a slot > t + η, so asynchrony-resilience is not satisﬁed in this execution. In order to show the desired
+result, we then only need to show that the execution is (∞, η)-compliant. For slots s ̸∈(t, t + η], we have to
+show that ∞-sleepiness holds. It suﬃces to show that |Hs−1| ≥2 > n
+2 . For s ≤t, we have Hs−1 = {v1, v2},
+while for s > t + η we have {v2, v3} ⊆Hs−1 , so this is indeed the case. For slots s ∈(t, t + η + 1], we have
+Ht \ As = Ht = {v1, v2}, so the condition which needs to hold during the η-tpa is satisﬁed. Moreover, Ht are
+awake at round 3∆t + 2∆, satisfying even the last condition of (∞, η)-compliance.

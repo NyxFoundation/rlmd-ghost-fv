@@ -1,0 +1,5 @@
+### Statement (line 1049)
+Theorem 7 (Dynamic availability). RLMD-GHOST is η-dynamically-available.
+
+### Proof (line 0)
+(follows from Lemma 4 via Theorem 2; no separate proof — see ll. 1045-1047)

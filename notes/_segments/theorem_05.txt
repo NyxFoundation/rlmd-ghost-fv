@@ -1,0 +1,5 @@
+### Statement (line 973)
+Theorem 5. Goldﬁsh is not (τ, π)-asynchrony-resilient for any τ > π ≥2.
+
+### Proof (line 0)
+(the proof precedes the statement — see the (inf, 2)-compliant attack construction in Sec. 4.3 concluding at ll. 970-972)

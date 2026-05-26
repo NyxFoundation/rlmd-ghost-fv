@@ -1,0 +1,15 @@
+### Statement (line 1631)
+Theorem 13 (Dynamic availability). RLMD-GHOST with fast conﬁrmations is η-dynamically-available.
+
+### Proof (line 1632)
+Proof. η-liveness follows directly from Theorem 7, in particular from η-liveness of RLMD-GHOST without fast
+conﬁrmations. This is because fast conﬁrmations are not needed for the conﬁrmed chain to make progress,
+and so liveness of the standard conﬁrmations suﬃces. We then only need to show that it satisﬁes η-safety. If
+an honest validator fast conﬁrms a block B at slot t in an η-compliant execution, then B is in the canonical
+chain of all active validators at rounds ≥3∆(t + 1) + ∆, by Theorem 12. At slot t + κ, B is then in the κ-
+slots-deep preﬁx of the canonical chain of all active validators and thus conﬁrmed by them with the standard
+conﬁrmation rule. Therefore, a safety violation involving conﬂicting conﬁrmed chains Chr
+i and Chr′
+j can be
+reduced to a safety violation for the standard conﬁrmation rule, for rounds r + 3∆(κ + 1) and r′ + 3∆(κ + 1).
+Theorem 7 then implies the η-safety of the protocol.

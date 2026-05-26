@@ -1,0 +1,10 @@
+### Statement (line 1624)
+Theorem 12 (Reorg resilience of fast conﬁrmations). Consider an η-compliant execution of RLMD-GHOST.
+A block fast conﬁrmed by an honest validator at a slot t after GST is always in the canonical chain of all
+active validators at rounds ≥3∆(t + 1) + ∆.
+
+### Proof (line 1627)
+Proof. The proof follows that of Theorem 1, using Lemma 5 instead of Lemma 1 as the base case. The
+assumption of Lemma 5 about equivocators is satisﬁed by (the new) deﬁnition of η-compliance. Proposition 1,
+which we have proven for η-compliant executions of RLMD-GHOST in Lemma 4, is still used for the inductive
+step.

@@ -1,0 +1,14 @@
+### Statement (line 663)
+Lemma 2. With overwhelming probability, all slot intervals of length κ contain at least a pivot slot.
+
+### Proof (line 664)
+Proof. By assumption of fairness of the proposal mechanism, the proposer vp of slot t is active at round 3∆t
+with probability h3∆t
+n
+≥h0
+n , for h0 > 0. Given any κ slots, the probability of none of the κ slots having an
+active proposer is ≤( n−h0
+n
+)κ, i.e., negligible in κ. The number of slot intervals of length κ which we need to
+consider is equal to the time horizon Thor over which the protocol is executed, which is polynomial in κ, so
+the probability of even one occurrence of κ consecutive slots without a pivot slot is also negligible.

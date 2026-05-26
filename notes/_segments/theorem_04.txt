@@ -1,0 +1,33 @@
+### Statement (line 879)
+Theorem 4. LMD-GHOST is not τ-dynamically-available for any ﬁnite τ and any conﬁrmation rule with
+ﬁnite conﬁrmation time Tconf.
+
+### Proof (line 881)
+Proof. For some τ < ∞and a conﬁrmation rule with conﬁrmation time Tconf, we show that τ-safety and
+τ-liveness are in conﬂict for LMD-GHOST. We look at a speciﬁc execution, which we assume satisﬁes liveness,
+and show that it does not satisfy safety. Moreover, we show that such execution is τ-compliant. Therefore,
+there are τ-compliant executions in which either liveness or safety is not satisﬁed, and consequently LMD-
+GHOST is not τ-dynamically-available.
+Without loss of generality, we ﬁx a ﬁnite τ ≥Tconf (we do not need to consider τ < Tconf since τ1-dynamic-
+availability implies τ2-dynamic-availability for τ1 ≤τ2). We consider a validator set of size n = 2m + 1,
+partitioned in three sets, V1, V2, and V3, with V1 = {v1}, |V2| = m + 1, |V3| = m −1. Validators in V2 and V3
+are all initially honest, while v1 is adversarial. Let t −1 and t be two adversarial slots, i.e., controlled by v1.
+In slot t, validator v1 publishes conﬂicting blocks A and B, one as a proposal for slot t −1 and the other for
+slot t. By round 3∆t + ∆, the adversary delivers only A to validators in V2, and only B to validators in V3,
+so that the former vote for A and the latter for B in slot t8. At this point, the adversary puts all validators
+in V3 to sleep, and then does nothing for N ≫τ slots, i.e., until slot t + N. Meanwhile, validators in V2 keep
+voting for A, since V2 contains m+1 > n
+2 validators, so A stays canonical in all of the views of every member
+of V2. Since τ ≥Tconf, this execution satisfying liveness implies that some honest proposal made after slot t is
+conﬁrmed in this period, and thus that block A is conﬁrmed, since all honest proposals made in this period are
+descendants of A. For any slot s ∈[0, t+1], we have that |Hs−1| = |V2 ∪V3| = 2m, so τ-sleepiness is satisﬁed.
+For s ∈[t + 2, t + τ], we have that |Hs−1| = |V2| = m + 1 > m = |V1 ∪V3| = |As ∪(Hs−τ,s−2 \ Hs−1)|,
+so τ-sleepiness is also satisﬁed. For s ∈[t + τ + 1, t + N −1], the ﬁrst two terms are unchanged, while
+Hs−τ,s−2 \Hs = ∅, because the last vote broadcast by the validators in |V3| is from slot t < s−τ. τ-sleepiness
+is then still satisﬁed. At slot t + N, the adversary corrupts a single validator v2 ∈V2, and starts voting for
+B with both v1 and v2. Now, B has m + 1 votes, and descendants of A only m, so B becomes canonical
+and stay so. After Tconf slots, it is conﬁrmed by all validators in V2, meaning we have a safety violation.
+The adversary does not perform any more corruptions nor puts to sleep any more validators, and does not
+wake up validators in V3. Therefore, for all slots s ≥t + N, we have As = {v1, v2}, V2 \ {v2} ⊆Hs−1
+and Hs−τ,s−2 \ Hs−1 = ∅. τ-sleepiness is then satisﬁed, because |Hs−1| ≥m > 2 = |As ∪Hs−τ,s−2 \ Hs|.
+Therefore, the executions is τ-compliant, and thus the protocol does not satisfy τ-security.

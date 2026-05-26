@@ -1,0 +1,24 @@
+### Statement (line 1025)
+Lemma 4. Proposition 1 holds for RLMD-GHOST in η-compliant executions.
+
+### Proof (line 1026)
+Proof. Let V be the view of an active validator at a round ∈{3∆t, 3∆t + ∆}. By the synchrony assumption,
+and since the buﬀer is merged at round 3∆(t −1) + 2∆, all honest votes from slot t −1 are in V and, by
+assumption, they are for descendants of B. The only votes to consider in order to decide whether B is
+canonical in V are those from slots ∈[t −η, t −1], because votes from slots prior to t −η are expired at slot t.
+Votes that are not for descendants of B might be those from adversarial validators in At, or from validators
+in Ht−η,t−2 \ Ht−1, i.e., those that have voted in at least some slot ∈[t −η, t −2], but did not vote in slot
+s −1. Observe that Ht−1 ∩At might not be empty; there might be validators that were active in slot t −1
+but were (shortly after) corrupted. Therefore, V might contain more than one vote from slot t −1 from some
+of these validators.
+Let E ⊂Ht−1 ∩At be the set of validators in Ht−1 ∩At for which V contains more than one vote
+from slot t −1. Due to equivocation discounting, votes from validators in E will not count. Observe that
+the number of votes that are not for descendants of B and that are counted in V is upper bounded by
+|(At \ E)∪(Ht−η,t−2 \ Ht−1)| = |(At ∪(Ht−η,t−2 \ Ht−1))\ E| = |At ∪(Ht−η,t−2 \ Ht−1)|−|E|, where the ﬁrst
+equality follows from E ⊂Ht−1. Since V contains votes for descendants of B for all validators in Ht−1, the
+number of votes for descendants of B and that are counted in V is lower bounded by |Ht−1\E| = |Ht−1|−|E|.
+Since this is an η-compliant execution, η-sleepiness holds, i.e., |Ht−1| > |At ∪(Ht−η,t−2 \ Ht−1|), so B is
+canonical in V.
+As shown in Section 3, since Proposition 1 holds for RLMD-GHOST in η-compliant executions, the next
+two theorems follow. Observe that, by the hierarchy of sleepy models (see Section 2), the following results
+are also satisﬁed for τ ≥η. In Appendix A, we show that these results are tight.
