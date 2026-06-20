@@ -1,6 +1,9 @@
 # Source paper PDF — referenced via arXiv/ePrint links instead
 2302.11326.pdf
 
+# Lean / Lake build artifacts (lake-manifest.json is committed to pin deps)
+/.lake/
+
 # OS / editor cruft
 .DS_Store
 *.swp
