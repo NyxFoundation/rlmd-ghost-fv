@@ -42,9 +42,15 @@ only declared axiom is the probabilistic pivot-slot fact of Lemma 2
 (`RLMDGhost/Axioms.lean`, Barrier 1), threaded as a hypothesis into its
 dependents.
 
-Statement coverage so far — **Track A** (§3.6, abstract propose-vote-merge
-framework): Lemma 1, Lemma 2 (axiom), Proposition 1, Theorems 1–2, under
-`RLMDGhost/ProposeVoteMerge/`.
+Statement coverage so far:
+
+- **Track A** (§3.6, abstract propose-vote-merge framework): Lemma 1, Lemma 2
+  (axiom), Proposition 1, Theorems 1–2, under `RLMDGhost/ProposeVoteMerge/`.
+- **Track B** (§4, GHOST instantiations): Lemma 3 and Theorem 3, under
+  `RLMDGhost/GhostInstantiations/`, on the GHOST weight layer of
+  `RLMDGhost/Ghost.lean`. The negative results (Theorems 4–5) await the
+  generalized-sleepy-model layer (`RLMDGhost/Model.lean`, shared with
+  Tracks C–D).
 
 ## Contents
 
