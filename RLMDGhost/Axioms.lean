@@ -13,12 +13,18 @@ threading. This file declares the single Barrier-1 axiom:
   (paper, proof of Lemma 2). It is declared as an axiom so the deterministic
   dependents (Theorem 2, and later Track C/E results) can thread the good event
   `PivotEveryWindow` as a hypothesis. The measure-theoretic justification is
-  Phase 2 (issue #21) and never blocks dependents: `RLMDGhost.Phase2.Lemma2`
-  formalizes its analytic core — the union-bound failure probability
-  `horizon κ * (1 − p) ^ κ` (polynomial horizon, per-window miss factor `1 − p`)
-  is negligible in `κ`, i.e. `PivotEveryWindow` holds with overwhelming
-  probability (`pivotEveryWindow_failure_negligible`). The union bound itself is
-  threaded there as a hypothesis, per the probabilistic-fact discipline.
+  Phase 2 (issue #21) and never blocks dependents; it is now formalized
+  end-to-end:
+  * `RLMDGhost.Phase2.Lemma2` proves the analytic core — a polynomial horizon
+    times the per-window miss factor `(1 − p) ^ κ` is negligible in `κ`
+    (`pivotEveryWindow_failure_negligible`);
+  * `RLMDGhost.Phase2.UnionBound` builds the product-Bernoulli proposer lottery,
+    proves the per-slot draws independent, and derives the union bound
+    `P(some window misses) ≤ #windows · (1 − p) ^ κ` (`lot_union_bound`),
+    feeding it into the core so the failure probability is negligible
+    (`pivotEveryWindow_fail_negligible`).
+  The union bound is thus a theorem about the probability space, not a threaded
+  hypothesis. `PivotEveryWindow` holds with overwhelming probability.
 
 The Barrier-2 idealized-cryptography axioms (`SignatureUnforgeable`,
 proposer-lottery consistency/uniqueness) are stated over the equivocation

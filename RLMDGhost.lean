@@ -30,6 +30,7 @@ import RLMDGhost.FastConfirmation.Theorem12
 import RLMDGhost.FastConfirmation.Theorem13
 import RLMDGhost.FastConfirmation.Theorem14
 import RLMDGhost.Phase2.Lemma2
+import RLMDGhost.Phase2.UnionBound
 
 /-!
 # RLMD-GHOST — Lean 4 formalization
