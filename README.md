@@ -48,9 +48,13 @@ Statement coverage so far:
   (axiom), Proposition 1, Theorems 1–2, under `RLMDGhost/ProposeVoteMerge/`.
 - **Track B** (§4, GHOST instantiations): Lemma 3 and Theorem 3, under
   `RLMDGhost/GhostInstantiations/`, on the GHOST weight layer of
-  `RLMDGhost/Ghost.lean`. The negative results (Theorems 4–5) await the
-  generalized-sleepy-model layer (`RLMDGhost/Model.lean`, shared with
-  Tracks C–D).
+  `RLMDGhost/Ghost.lean`. The negative results (Theorems 4–5) additionally
+  need concrete adversarial executions instantiating the interfaces.
+- **Track C** (§5.2, RLMD-GHOST security): Lemma 4 and Theorems 6–8, under
+  `RLMDGhost/Security/`, on the generalized sleepy model of
+  `RLMDGhost/Model.lean` (per-slot honest/corrupted `Finset`s, the
+  `η`-sleepiness and `(η, η−1)`-compliance inequalities) and the abstract
+  RLMD filter interface of `RLMDGhost/Security/Basic.lean`.
 
 ## Contents
 
