@@ -351,6 +351,31 @@ theorem E9_spec {η : ℕ} (hη : 2 ≤ η) : Spec (E9 η) where
   vote_chAt {v t} _ := rfl
   vote_unique {v t b b'} _ hb hb' := hb.trans hb'.symm
 
+/-! ## The sleepy model and the delivery fields -/
+
+/-- The honest-voter and corrupted sets. Honest active: all of `{1,…,10}`
+through slot 1; `{1,…,6}` while `V3` sleeps (`[2, η]`); `{3,…,10}` after the
+reorg (`V3` woken, `v2, v3` corrupted). Corrupted: `{0}` through slot `η`, then
+`{0, 1, 2}`. -/
+def SM9 (η : ℕ) : SleepyModel (E9 η) where
+  H t := if t ≤ 1 then {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+    else if t ≤ η then {1, 2, 3, 4, 5, 6} else {3, 4, 5, 6, 7, 8, 9, 10}
+  A t := if t ≤ η then {0} else {0, 1, 2}
+  H_voter := fun _ => trivial
+
+/-- The counted vote of `u` at slot 1 over any slot-1 group view is genesis
+(every validator's only in-window vote is its slot-0 genesis vote). -/
+theorem voteOf_slot1 {η : ℕ} (hη : 2 ≤ η) (v u : V9) : voteOfV (effV η v 1) η 1 u = some gen := by
+  unfold voteOfV
+  refine voteOf1_at_prev (by omega) (by omega) ?_ ?_
+  · show tabF η u (1 - 1) = {gen}
+    rw [show (1 - 1) = 0 from rfl]
+    unfold tabF; rw [if_neg (Nat.not_succ_le_zero η), if_pos rfl]
+  · -- gen is seen in any known set
+    show okBlk (effV η v 1).1 gen
+    unfold effV; rw [if_neg (by decide), if_pos rfl]
+    trivial
+
 end Tightness
 
 end RLMDGhost
