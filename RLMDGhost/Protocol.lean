@@ -134,6 +134,11 @@ structure Spec (E : Execution Block Validator View) : Prop where
   vote_chAt :
     ∀ {v : Validator} {t : Slot}, E.voter v t →
       E.votesFor v t (E.chAt v (E.voteRound t))
+  /-- **Honest voters do not equivocate**: an honest voter of slot `t` casts at
+  most one slot-`t` vote. -/
+  vote_unique :
+    ∀ {v : Validator} {t : Slot} {b b' : Block},
+      E.voter v t → E.votesFor v t b → E.votesFor v t b' → b = b'
 
 /-- **Reorg resilience** (§3.1): every honest proposal — the proposal of a pivot
 slot `t` — is in the canonical chain of every honest active validator at every
