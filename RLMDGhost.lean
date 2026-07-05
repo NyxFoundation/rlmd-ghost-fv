@@ -21,6 +21,7 @@ import RLMDGhost.Tightness.Theorem9Regimes
 import RLMDGhost.Tightness.WitnessBase
 import RLMDGhost.Tightness.Theorem9Close
 import RLMDGhost.Tightness.Theorem11
+import RLMDGhost.Tightness.Theorem5
 import RLMDGhost.FastConfirmation.Basic
 import RLMDGhost.FastConfirmation.Lemma5
 import RLMDGhost.FastConfirmation.Theorem12
