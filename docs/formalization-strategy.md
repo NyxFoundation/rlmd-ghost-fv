@@ -1,6 +1,6 @@
 ---
 title: RLMD-GHOST Lean 4 Formalization Strategy
-last_updated: 2026-05-26
+last_updated: 2026-07-06
 tags:
   - lean4
   - formal-verification
@@ -53,10 +53,28 @@ fork-choice arguments are deterministic *given* a pivot slot.
 
 **Decision.** Thread the pivot-slot good event as a hypothesis into the
 deterministic theorems (fully proved). Declare **Lemma 2** as an `axiom` (label
-`needs-axiom`); it closes at **Phase 1**. The measure-theoretic proof (proposer
-lottery + concentration; concentration bounds are not in core Mathlib) is tracked
+`needs-axiom`); it closes at **Phase 1**. The measure-theoretic proof is tracked
 in a separate **Phase 2** follow-up issue (label `phase2`) and never blocks
 dependents.
+
+**Status (Phase 2 complete, issue #21 closed).** The probabilistic content of
+Lemma 2 is now formalized end-to-end, `sorry`-free and depending only on Lean
+core axioms:
+
+- `RLMDGhost/Phase2/Lemma2.lean` — the analytic core: geometric decay `q^κ`
+  (`q = 1 − p < 1`) is negligible, so a polynomial horizon times the per-window
+  miss factor is negligible (`pivotEveryWindow_failure_negligible`). The concrete
+  bound used is a union bound, *not* a Chernoff bound, so core Mathlib suffices.
+- `RLMDGhost/Phase2/UnionBound.lean` — the probability space: the
+  product-Bernoulli proposer lottery (`Measure.pi`), independence of the per-slot
+  draws (`iIndepFun_pi`), the per-window miss probability `(1 − p)^κ`
+  (`iIndepFun.meas_iInter`), and the union bound `P(some window misses) ≤
+  #windows · (1 − p)^κ` (`measure_biUnion_finset_le`), assembled into
+  `pivotEveryWindow_fail_negligible`.
+
+The union bound is a theorem about the probability space rather than a threaded
+hypothesis. The `lemma2` axiom is retained only as the deterministic bridge that
+dependents thread around (none actually depend on it).
 
 ### 2. Idealized cryptography
 
