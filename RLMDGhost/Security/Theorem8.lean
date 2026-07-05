@@ -263,4 +263,20 @@ theorem theorem8 (T : TpaModel E SM η R t1 t2) {t : Slot} (TS : TpaSpec E t)
   exact ⟨fun s hts v hv => main s hts _ v (Or.inr rfl) hv,
          fun s hts v hv => main s (le_of_lt hts) _ v (Or.inl ⟨rfl, hts⟩) hv⟩
 
+/-- **Asynchrony resilience** (Definition 7): in an execution with a tpa
+`(t1, t2)`, every honest proposal `B` from a pivot slot `t ≤ t1` is in the
+canonical chain of all *aware* validators at every fork-choice round from
+`3∆t + ∆` on. This is exactly the conclusion `theorem8` establishes for
+`(η, η−1)`-compliant executions; `theorem11` exhibits an `(∞, η)`-compliant
+execution for which it *fails*. -/
+def AsynchronyResilient (E : Execution Block Validator View) (SM : SleepyModel E)
+    (t1 t2 : Slot) : Prop :=
+  ∀ t : Slot, t ≤ t1 → E.pivot t →
+    (∀ s : Slot, t ≤ s → ∀ v : Validator,
+      Aware E SM t1 t2 v s (E.voteRound s) →
+        E.proposal t ≤ E.chAt v (E.voteRound s)) ∧
+    (∀ s : Slot, t < s → ∀ v : Validator,
+      Aware E SM t1 t2 v s (E.slotStart s) →
+        E.proposal t ≤ E.chAt v (E.slotStart s))
+
 end RLMDGhost
