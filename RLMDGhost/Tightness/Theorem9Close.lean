@@ -470,6 +470,42 @@ theorem E9_hvc {η : ℕ} (hη : 2 ≤ η) {v : V9} {t : ℕ} (u : V9) (hu : u �
     have hgt : η < t := Nat.lt_of_not_le hηt
     exact Or.inl ⟨bB, voteOf_tail hη (by omega) u, vF_tail u hη (by omega)⟩
 
+/-! ### `counted_from_window` -/
+
+theorem zero_mem_A {η : ℕ} (s : ℕ) : (0 : V9) ∈ (SM9 η).A s := by
+  simp only [SM9]; by_cases h : s ≤ η
+  · rw [if_pos h]; decide
+  · rw [if_neg h]; decide
+
+/-- `H_t ∪ A_{t+1} ∪ Hwindow η (t+1)` covers every validator, so any counted
+vote's sender is accounted for. -/
+theorem E9_cfw_cover {η : ℕ} (hη : 2 ≤ η) (t : ℕ) (u : V9) :
+    u ∈ (SM9 η).H t ∨ u ∈ (SM9 η).A (t + 1) ∨ u ∈ (SM9 η).Hwindow η (t + 1) := by
+  by_cases h0 : u.val = 0
+  · refine Or.inr (Or.inl ?_)
+    rw [show u = 0 from Fin.ext h0]; exact zero_mem_A _
+  by_cases hle1 : t ≤ 1
+  · left; simp only [SM9]; rw [if_pos hle1, mem_H10]; omega
+  by_cases hηt : t ≤ η
+  · -- t ∈ [2, η]
+    by_cases h6 : u.val ≤ 6
+    · left; simp only [SM9]; rw [if_neg hle1, if_pos hηt, mem_H6]; omega
+    · -- V3: in Hwindow via slot 1
+      refine Or.inr (Or.inr ?_)
+      rw [SleepyModel.mem_Hwindow]
+      have ha : t + 1 ≤ 1 + η := by omega
+      have hb : 1 + 2 ≤ t + 1 := by omega
+      refine ⟨1, ha, hb, ?_⟩
+      simp only [SM9]; rw [if_pos (by omega : (1 : ℕ) ≤ 1), mem_H10]; omega
+  · -- t ≥ η + 1
+    by_cases h2 : u.val ≤ 2
+    · refine Or.inr (Or.inl ?_)
+      simp only [SM9]; rw [if_neg (by omega : ¬ t + 1 ≤ η)]
+      have : u ∈ ({0, 1, 2} : Finset V9) := mem_A012 u h2
+      exact this
+    · left; simp only [SM9]; rw [if_neg hle1, if_neg hηt, mem_H38]
+      exact ⟨by omega, by omega⟩
+
 end Tightness
 
 end RLMDGhost
