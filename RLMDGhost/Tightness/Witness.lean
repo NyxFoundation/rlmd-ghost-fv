@@ -368,6 +368,19 @@ theorem card_votesV_le_weight_add (W : Vw V) (η s : ℕ) (X : Blk)
     · exact Finset.mem_union_right _ (h u b hb hXb)
   exact (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
 
+/-- Bookkeeping for `RLMDGhostBase.weight_le_contrib`: if every counted vote
+for a descendant of `X` comes from `A`, then `w(X, ·) ≤ |A|`. -/
+theorem weight_votesV_le_contrib (W : Vw V) (η s : ℕ) (X : Blk)
+    (A : Finset V)
+    (h : ∀ u b, voteOfV W η s u = some b → X ≤ b → u ∈ A) :
+    weight X (votesV W η s) ≤ A.card := by
+  classical
+  rw [weight_votesV_eq]
+  apply Finset.card_le_card
+  intro u hu
+  obtain ⟨-, b, hb, hXb⟩ := Finset.mem_filter.mp hu
+  exact h u b hb hXb
+
 /-- Counted votes target seen blocks: positive weight forces seen-ness. -/
 theorem ok_of_weight_pos {W : Vw V} {η s : ℕ} {X : Blk}
     (h : 0 < weight X (votesV W η s)) : okBlk W.1 X := by
