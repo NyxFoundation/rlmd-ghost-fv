@@ -12,8 +12,13 @@ threading. This file declares the single Barrier-1 axiom:
   proposer-selection lottery and a union bound over the polynomial time horizon
   (paper, proof of Lemma 2). It is declared as an axiom so the deterministic
   dependents (Theorem 2, and later Track C/E results) can thread the good event
-  `PivotEveryWindow` as a hypothesis. The measure-theoretic proof replacing the
-  axiom is Phase 2, tracked by issue #21, and never blocks dependents.
+  `PivotEveryWindow` as a hypothesis. The measure-theoretic justification is
+  Phase 2 (issue #21) and never blocks dependents: `RLMDGhost.Phase2.Lemma2`
+  formalizes its analytic core — the union-bound failure probability
+  `horizon κ * (1 − p) ^ κ` (polynomial horizon, per-window miss factor `1 − p`)
+  is negligible in `κ`, i.e. `PivotEveryWindow` holds with overwhelming
+  probability (`pivotEveryWindow_failure_negligible`). The union bound itself is
+  threaded there as a hypothesis, per the probabilistic-fact discipline.
 
 The Barrier-2 idealized-cryptography axioms (`SignatureUnforgeable`,
 proposer-lottery consistency/uniqueness) are stated over the equivocation
