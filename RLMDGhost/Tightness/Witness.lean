@@ -263,6 +263,30 @@ theorem voteOf1_eq_none_of_empty {K : Finset Blk} {T : Slot → Finset Blk}
   unfold voteOf1
   rw [dif_neg (by simp [h])]
 
+/-- **Latest-message evaluation.** Since the candidate slots for slot `s` all lie
+in `[s−η, s−1]`, slot `s − 1` — if a validator voted a single seen block there —
+is automatically the latest, so its counted vote is that block, with no
+condition on any other slot. This is the general fact behind honest delivery:
+an active validator's counted vote at slot `s` is its slot-`(s−1)` vote. -/
+theorem voteOf1_at_prev {K : Finset Blk} {T : Slot → Finset Blk} {η s : ℕ}
+    {b : Blk} (hs : 1 ≤ s) (hη : 1 ≤ η) (hT : T (s - 1) = {b}) (hok : okBlk K b) :
+    voteOf1 K T η s = some b := by
+  refine voteOf1_eq_some (L := s - 1) ?_ ?_ hT hok
+  · rw [mem_cand]; refine ⟨by omega, by omega, ?_⟩; rw [hT]; exact Finset.singleton_ne_empty b
+  · intro u' hu'; rw [mem_cand] at hu'; omega
+
+/-- **Latest-message equivocation.** If a validator's slot-`(s−1)` votes are not
+a single block (it equivocated) and no later slot is in window, its counted vote
+at slot `s` is discounted to `none`. -/
+theorem voteOf1_at_prev_none {K : Finset Blk} {T : Slot → Finset Blk} {η s : ℕ}
+    (hs : 1 ≤ s) (hη : 1 ≤ η) (hne : T (s - 1) ≠ ∅)
+    (hnsingle : ∀ b : Blk, T (s - 1) ≠ {b}) :
+    voteOf1 K T η s = none := by
+  refine voteOf1_eq_none (L := s - 1) ?_ ?_ ?_
+  · rw [mem_cand]; exact ⟨by omega, by omega, hne⟩
+  · intro u' hu'; rw [mem_cand] at hu'; omega
+  · intro b hb; obtain ⟨h1, -⟩ := hb; exact hnsingle b h1
+
 /-- Growing the known set only turns `none` into `some` (for a newly seen
 target), never changes or removes a counted vote. -/
 theorem voteOf1_grow {K K' : Finset Blk} (hK : K ⊆ K')

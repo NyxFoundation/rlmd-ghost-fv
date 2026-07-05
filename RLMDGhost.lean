@@ -17,6 +17,7 @@ import RLMDGhost.Security.Theorem7
 import RLMDGhost.Security.Theorem8
 import RLMDGhost.Tightness.Witness
 import RLMDGhost.Tightness.Theorem9Core
+import RLMDGhost.Tightness.Theorem9Regimes
 import RLMDGhost.Tightness.WitnessBase
 import RLMDGhost.FastConfirmation.Basic
 import RLMDGhost.FastConfirmation.Lemma5
