@@ -57,6 +57,12 @@ Statement coverage so far:
   and the `RLMDGhostBase` counting bookkeeping. The three impossibility
   theorems (9–11) instantiate this layer with the paper's adversarial
   schedules — that construction work is ongoing.
+- **Track E** (App. B, fast confirmations): Lemma 5 and Theorems 12–14, under
+  `RLMDGhost/FastConfirmation/`, on the abstract fast-confirmation interface of
+  `RLMDGhost/FastConfirmation/Basic.lean`. Reuses the Track C security stack:
+  Theorem 12 composes Lemma 5 with Lemma 4 through the shared reorg-resilience
+  induction, Theorem 13 reduces to Theorem 7, and Theorem 14 rests on
+  Lemma 1.
 - **Track C** (§5.2, RLMD-GHOST security): Lemma 4 and Theorems 6–8, under
   `RLMDGhost/Security/`, on the generalized sleepy model of
   `RLMDGhost/Model.lean` (per-slot honest/corrupted `Finset`s, the

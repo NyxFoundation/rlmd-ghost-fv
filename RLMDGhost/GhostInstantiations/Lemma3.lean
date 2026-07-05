@@ -51,4 +51,33 @@ theorem lemma3 {M : Multiset Block} {B C : Block}
     have h3 : weight B' M + weight B'' M ≤ M.card := weight_add_weight_le hconf M
     omega
 
+/-- **Lemma 3, per-sibling form** (used by Lemma 5, §B). If `B` has positive
+weight and strictly outweighs every *conflicting* block, then any GHOST output
+on `M` is a descendant of `B`. Unlike `lemma3` this needs only a per-sibling
+comparison, not an overall strict majority — the fast-confirmation quorum gives
+`w(B) > n/3` while each conflicting block collects `≤ n/3`. -/
+theorem canonical_of_conflict_lt {M : Multiset Block} {B C : Block}
+    (hpos : 0 < weight B M)
+    (hconf : ∀ B' : Block, Conflicts B B' → weight B' M < weight B M)
+    (hghost : GhostSelects M C) : B ≤ C := by
+  by_contra hBC
+  by_cases hcons : Consistent B C
+  · rcases hcons with hle | hge
+    · exact hBC hle
+    · have hCB : C < B := lt_of_le_of_ne hge fun e => hBC (e ▸ le_rfl)
+      obtain ⟨Y, hcov, hYB⟩ := exists_covBy_le hCB
+      have h0 : weight Y M = 0 := hghost.progress hcov
+      have hBY : weight B M ≤ weight Y M := weight_le_weight_of_le hYB M
+      omega
+  · obtain ⟨P, B', B'', hcov', hcov'', hB'B, hB''C, hconf'⟩ := exists_fork hcons
+    -- `B''` conflicts with `B`: else `B'` and `B''` would be consistent
+    have hconfB : Conflicts B B'' := by
+      rintro (hle | hle)
+      · exact hconf' (Or.inl (hB'B.trans hle))
+      · exact hconf' (consistent_of_le_of_le hB'B hle)
+    have h1 : weight B M ≤ weight B' M := weight_le_weight_of_le hB'B M
+    have h2 : weight B' M ≤ weight B'' M := hghost.choice_max hcov' hcov'' hB''C
+    have h3 : weight B'' M < weight B M := hconf B'' hconfB
+    omega
+
 end RLMDGhost

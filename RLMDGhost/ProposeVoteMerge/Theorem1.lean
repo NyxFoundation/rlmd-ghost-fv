@@ -30,25 +30,11 @@ variable {Block Validator View : Type*} [BlockTree Block] [SemilatticeSup View]
 
 /-- **Theorem 1 (Reorg resilience).** An execution of a propose-vote-merge
 protocol in which Proposition 1 (`Persistence`) holds satisfies reorg
-resilience. -/
-theorem theorem1 (S : Spec E) (hP : Persistence E) : ReorgResilient E := by
-  intro t hpivot
-  have key : ∀ s : Slot, t ≤ s → ∀ v : Validator, E.active v (E.voteRound s) →
-      E.proposal t ≤ E.chAt v (E.voteRound s) := by
-    intro s hts
-    induction s, hts using Nat.le_induction with
-    | base => exact fun v hv => (lemma1_canonical S hpivot hv).ge
-    | succ s _ ih =>
-      intro v hv
-      have hvotes : ∀ u : Validator, E.voter u s → E.votesForDescendant u s (E.proposal t) :=
-        fun u hu => ⟨E.chAt u (E.voteRound s), ih u hu, S.vote_chAt hu⟩
-      exact (hP s (E.proposal t) hvotes v).2 hv
-  refine ⟨key, fun s hts v hv => ?_⟩
-  obtain ⟨s, rfl⟩ : ∃ s', s = s' + 1 :=
-    ⟨s - 1, (Nat.succ_pred_eq_of_pos (Nat.lt_of_le_of_lt t.zero_le hts)).symm⟩
-  have hvotes : ∀ u : Validator, E.voter u s → E.votesForDescendant u s (E.proposal t) :=
-    fun u hu =>
-      ⟨E.chAt u (E.voteRound s), key s (Nat.lt_succ_iff.mp hts) u hu, S.vote_chAt hu⟩
-  exact (hP s (E.proposal t) hvotes v).1 hv
+resilience. The base case of the induction is Lemma 1 — all honest voters of a
+pivot slot vote for the proposal — fed into the shared `canonical_from_base`. -/
+theorem theorem1 (S : Spec E) (hP : Persistence E) : ReorgResilient E :=
+  fun _t hpivot =>
+    Persistence.canonical_from_base hP S
+      (fun _v hv => Execution.votesForDescendant.of_votesFor (lemma1 S hpivot hv))
 
 end RLMDGhost
