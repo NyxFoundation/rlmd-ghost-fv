@@ -23,6 +23,7 @@ import RLMDGhost.Tightness.Theorem9Close
 import RLMDGhost.Tightness.Theorem11
 import RLMDGhost.Tightness.Theorem5
 import RLMDGhost.Tightness.Theorem4
+import RLMDGhost.Tightness.Theorem10
 import RLMDGhost.FastConfirmation.Basic
 import RLMDGhost.FastConfirmation.Lemma5
 import RLMDGhost.FastConfirmation.Theorem12
