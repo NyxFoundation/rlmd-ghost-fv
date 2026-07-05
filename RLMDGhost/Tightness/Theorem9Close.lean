@@ -317,7 +317,7 @@ theorem E9_not_reorgResilient {η : ℕ} (hη : 2 ≤ η) : ¬ ReorgResilient (E
 
 /-! ## The `Spec` instance -/
 
-theorem effV_ge2 {η : ℕ} {u : V9} {s : Slot} (hs : 2 ≤ s) : effV η u s = viewF η := by
+theorem effV_ge2 {η : ℕ} {u : V9} {s : ℕ} (hs : 2 ≤ s) : effV η u s = viewF η := by
   unfold effV
   rw [if_neg (fun h => by simp only [h] at hs; exact absurd hs (by decide)),
     if_neg (fun h => by simp only [h] at hs; exact absurd hs (by decide))]
@@ -375,6 +375,37 @@ theorem voteOf_slot1 {η : ℕ} (hη : 2 ≤ η) (v u : V9) : voteOfV (effV η v
     show okBlk (effV η v 1).1 gen
     unfold effV; rw [if_neg (by decide), if_pos rfl]
     trivial
+
+/-- `votesFor u t b` is exactly `b = fcV (effV η u t) η t`. -/
+theorem E9_votesFor_iff {η : ℕ} {u : V9} {t : ℕ} {b : Blk} :
+    (E9 η).votesFor u t b ↔ b = fcV (effV η u t) η t := by
+  show (b = fcV (effV η u ((3 * 1 * t + 1) / 3)) η ((3 * 1 * t + 1) / 3)) ↔ _
+  rw [three_one_mul_add t, div3_mul_add t]
+
+/-- The tip `u` computes at slot `t`, by regime. -/
+theorem chAtV_eq {η : ℕ} (hη : 2 ≤ η) (u : V9) {t : ℕ} :
+    fcV (effV η u t) η t =
+      if t = 0 then gen
+      else if t = 1 then (if 7 ≤ u.val then bB else bA)
+      else if t ≤ η then bC else bB := by
+  by_cases h0 : t = 0
+  · rw [if_pos h0]; subst h0; exact fcV_slot0 η u
+  · rw [if_neg h0]
+    by_cases h1 : t = 1
+    · rw [if_pos h1]; subst h1
+      by_cases h7 : 7 ≤ u.val
+      · rw [if_pos h7]; exact fcV_slot1_v3 hη h7
+      · rw [if_neg h7]; exact fcV_slot1_v2 hη (Nat.lt_succ_iff.mp (not_le.mp h7))
+    · rw [if_neg h1, effV_ge2 (by omega)]
+      by_cases hηt : t ≤ η
+      · rw [if_pos hηt]
+        rcases Nat.lt_or_ge t 3 with h3 | h3
+        · rw [show t = 2 from by omega]; exact fcV_pivotF hη
+        · exact fcV_mid h3 hηt
+      · rw [if_neg hηt]
+        rcases Nat.lt_or_ge t (η + 2) with h | h
+        · rw [show t = η + 1 from by omega]; exact fcV_reorgF hη
+        · exact fcV_tail hη h
 
 end Tightness
 
