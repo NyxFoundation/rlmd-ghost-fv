@@ -16,6 +16,11 @@ import RLMDGhost.Security.Theorem6
 import RLMDGhost.Security.Theorem7
 import RLMDGhost.Security.Theorem8
 import RLMDGhost.Tightness.Witness
+import RLMDGhost.FastConfirmation.Basic
+import RLMDGhost.FastConfirmation.Lemma5
+import RLMDGhost.FastConfirmation.Theorem12
+import RLMDGhost.FastConfirmation.Theorem13
+import RLMDGhost.FastConfirmation.Theorem14
 
 /-!
 # RLMD-GHOST — Lean 4 formalization

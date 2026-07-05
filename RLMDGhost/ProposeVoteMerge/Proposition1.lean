@@ -51,6 +51,41 @@ theorem votes_carry (hP : Persistence E) (S : Spec E) {t : Slot} {B : Block}
     ∀ v : Validator, E.voter v (t + 1) → E.votesForDescendant v (t + 1) B :=
   fun v hv => ⟨E.chAt v (E.voteRound (t + 1)), (hP t B hvotes v).2 hv, S.vote_chAt hv⟩
 
+/-- **The reorg-resilience induction, factored from any base case.** If all
+honest voters of a slot `t₀` vote for descendants of a block `B`, and
+Proposition 1 (`Persistence`) holds, then `B` is in the canonical chain of every
+honest active validator at both fork-choice rounds of every slot `≥ t₀`
+(strictly `> t₀` for the proposing round `3∆s`, since that round precedes slot
+`t₀`'s own voting round). This is the shared core behind Theorem 1 (base case
+Lemma 1) and Theorem 12 (base case Lemma 5). -/
+theorem canonical_from_base (hP : Persistence E) (S : Spec E) {t₀ : Slot} {B : Block}
+    (hbase : ∀ v : Validator, E.voter v t₀ → E.votesForDescendant v t₀ B) :
+    (∀ s : Slot, t₀ ≤ s → ∀ v : Validator, E.active v (E.voteRound s) →
+      B ≤ E.chAt v (E.voteRound s)) ∧
+    (∀ s : Slot, t₀ < s → ∀ v : Validator, E.active v (E.slotStart s) →
+      B ≤ E.chAt v (E.slotStart s)) := by
+  have key : ∀ s : Slot, t₀ ≤ s → ∀ v : Validator, E.active v (E.voteRound s) →
+      B ≤ E.chAt v (E.voteRound s) := by
+    intro s hts
+    induction s, hts using Nat.le_induction with
+    | base =>
+      intro v hv
+      obtain ⟨B', hBB', hvote⟩ := hbase v hv
+      calc B ≤ B' := hBB'
+        _ = E.chAt v (E.voteRound t₀) := S.vote_unique hv hvote (S.vote_chAt hv)
+    | succ s _ ih =>
+      intro v hv
+      have hvotes : ∀ u : Validator, E.voter u s → E.votesForDescendant u s B :=
+        fun u hu => ⟨E.chAt u (E.voteRound s), ih u hu, S.vote_chAt hu⟩
+      exact (hP s B hvotes v).2 hv
+  refine ⟨key, fun s hts v hv => ?_⟩
+  obtain ⟨s, rfl⟩ : ∃ s', s = s' + 1 :=
+    ⟨s - 1, (Nat.succ_pred_eq_of_pos (Nat.lt_of_le_of_lt t₀.zero_le hts)).symm⟩
+  have hvotes : ∀ u : Validator, E.voter u s → E.votesForDescendant u s B :=
+    fun u hu =>
+      ⟨E.chAt u (E.voteRound s), key s (Nat.lt_succ_iff.mp hts) u hu, S.vote_chAt hu⟩
+  exact (hP s B hvotes v).1 hv
+
 end Persistence
 
 end RLMDGhost

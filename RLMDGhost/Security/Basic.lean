@@ -69,6 +69,13 @@ structure RLMDGhostBase (E : Execution Block Validator View) where
     ∀ (V : View) (s : Slot) (B : Block) (A : Finset Validator),
       (∀ v b, voteOf V s v = some b → ¬B ≤ b → v ∈ A) →
       (votes V s).card ≤ weight B (votes V s) + A.card
+  /-- Bookkeeping (one counted vote per validator, upper bound): if every
+  counted vote for a descendant of `B` comes from a validator in `A`, then
+  `w(B, ·) ≤ |A|`. Dual of `count_le_weight`. -/
+  weight_le_contrib :
+    ∀ (V : View) (s : Slot) (B : Block) (A : Finset Validator),
+      (∀ v b, voteOf V s v = some b → B ≤ b → v ∈ A) →
+      weight B (votes V s) ≤ A.card
 
 /-- The fully synchronous RLMD-GHOST instantiation (Lemma 4, Theorems 6–7):
 the base mechanics plus the per-slot delivery facts. Field provenance:
