@@ -407,6 +407,235 @@ theorem chAtV_eq {η : ℕ} (hη : 2 ≤ η) (u : V9) {t : ℕ} :
         · rw [show t = η + 1 from by omega]; exact fcV_reorgF hη
         · exact fcV_tail hη h
 
+/-! ### Membership facts -/
+
+theorem mem_H10 : ∀ u : V9, (u ∈ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9)) ↔ 1 ≤ u.val := by
+  decide
+theorem mem_H6 : ∀ u : V9,
+    (u ∈ ({1, 2, 3, 4, 5, 6} : Finset V9)) ↔ (1 ≤ u.val ∧ u.val ≤ 6) := by decide
+theorem mem_H38 : ∀ u : V9,
+    (u ∈ ({3, 4, 5, 6, 7, 8, 9, 10} : Finset V9)) ↔ (3 ≤ u.val ∧ u.val ≤ 10) := by decide
+theorem mem_A012 : ∀ u : V9, u.val ≤ 2 → u ∈ ({0, 1, 2} : Finset V9) := by decide
+
+/-! ### `honest_vote_counted` -/
+
+theorem fcV_viewF_mid {η t : ℕ} (hη : 2 ≤ η) (h2 : 2 ≤ t) (hηt : t ≤ η) :
+    fcV (viewF η) η t = bC := by
+  rcases Nat.lt_or_ge t 3 with h | h
+  · rw [show t = 2 from by omega]; exact fcV_pivotF hη
+  · exact fcV_mid h hηt
+
+theorem fcV_viewF_tail {η t : ℕ} (hη : 2 ≤ η) (h : η + 1 ≤ t) :
+    fcV (viewF η) η t = bB := by
+  rcases Nat.lt_or_ge t (η + 2) with h' | h'
+  · rw [show t = η + 1 from by omega]; exact fcV_reorgF hη
+  · exact fcV_tail hη h'
+
+theorem vF_mid {η t : ℕ} (u : V9) (hη : 2 ≤ η) (h2 : 2 ≤ t) (hηt : t ≤ η) :
+    (E9 η).votesFor u t bC :=
+  E9_votesFor_iff.mpr (by rw [effV_ge2 (by omega : 2 ≤ t)]; exact (fcV_viewF_mid hη h2 hηt).symm)
+
+theorem vF_tail {η t : ℕ} (u : V9) (hη : 2 ≤ η) (h : η + 1 ≤ t) : (E9 η).votesFor u t bB :=
+  E9_votesFor_iff.mpr (by rw [effV_ge2 (by omega : 2 ≤ t)]; exact (fcV_viewF_tail hη h).symm)
+
+/-- **`honest_vote_counted` for `E9`.** -/
+theorem E9_hvc {η : ℕ} (hη : 2 ≤ η) {v : V9} {t : ℕ} (u : V9) (hu : u ∈ (SM9 η).H t) :
+    (∃ b, voteOfV (effV η v (t + 1)) η (t + 1) u = some b ∧ (E9 η).votesFor u t b) ∨
+      (voteOfV (effV η v (t + 1)) η (t + 1) u = none ∧ u ∈ (SM9 η).A (t + 1)) := by
+  by_cases h0 : t = 0
+  · subst h0
+    exact Or.inl ⟨gen, voteOf_slot1 hη v u, E9_votesFor_iff.mpr (fcV_slot0 η u).symm⟩
+  rw [effV_ge2 (show 2 ≤ t + 1 by omega)]
+  simp only [SM9] at hu
+  by_cases h1 : t = 1
+  · subst h1
+    rw [if_pos (le_refl 1), mem_H10] at hu
+    by_cases h7 : 7 ≤ u.val
+    · exact Or.inl ⟨bB, voteOf_pivotF_v3 hη h7, E9_votesFor_iff.mpr (fcV_slot1_v3 hη h7).symm⟩
+    · exact Or.inl ⟨bA, voteOf_pivotF_v2 hη hu (Nat.lt_succ_iff.mp (not_le.mp h7)),
+        E9_votesFor_iff.mpr (fcV_slot1_v2 hη (Nat.lt_succ_iff.mp (not_le.mp h7))).symm⟩
+  rw [if_neg (by omega : ¬ t ≤ 1)] at hu
+  by_cases hηt : t ≤ η
+  · rw [if_pos hηt, mem_H6] at hu
+    by_cases hteq : t = η
+    · rw [hteq]
+      by_cases h12 : u.val ≤ 2
+      · refine Or.inr ⟨voteOf_reorgF_equiv hη hu.1 h12, ?_⟩
+        simp only [SM9]; rw [if_neg (by omega : ¬ η + 1 ≤ η)]; exact mem_A012 u h12
+      · exact Or.inl ⟨bC, voteOf_reorgF_v2 hη (by omega) hu.2,
+          vF_mid u hη (by omega) (le_refl η)⟩
+    · exact Or.inl ⟨bC, voteOf_mid_v2 (by omega) (by omega) hu.1 hu.2,
+        vF_mid u hη (by omega) hηt⟩
+  · rw [if_neg hηt, mem_H38] at hu
+    have hgt : η < t := Nat.lt_of_not_le hηt
+    exact Or.inl ⟨bB, voteOf_tail hη (by omega) u, vF_tail u hη (by omega)⟩
+
+/-! ### `counted_from_window` -/
+
+theorem zero_mem_A {η : ℕ} (s : ℕ) : (0 : V9) ∈ (SM9 η).A s := by
+  simp only [SM9]; by_cases h : s ≤ η
+  · rw [if_pos h]; decide
+  · rw [if_neg h]; decide
+
+/-- `H_t ∪ A_{t+1} ∪ Hwindow η (t+1)` covers every validator, so any counted
+vote's sender is accounted for. -/
+theorem E9_cfw_cover {η : ℕ} (hη : 2 ≤ η) (t : ℕ) (u : V9) :
+    u ∈ (SM9 η).H t ∨ u ∈ (SM9 η).A (t + 1) ∨ u ∈ (SM9 η).Hwindow η (t + 1) := by
+  by_cases h0 : u.val = 0
+  · refine Or.inr (Or.inl ?_)
+    rw [show u = 0 from Fin.ext h0]; exact zero_mem_A _
+  by_cases hle1 : t ≤ 1
+  · left; simp only [SM9]; rw [if_pos hle1, mem_H10]; omega
+  by_cases hηt : t ≤ η
+  · -- t ∈ [2, η]
+    by_cases h6 : u.val ≤ 6
+    · left; simp only [SM9]; rw [if_neg hle1, if_pos hηt, mem_H6]; omega
+    · -- V3: in Hwindow via slot 1
+      refine Or.inr (Or.inr ?_)
+      rw [SleepyModel.mem_Hwindow]
+      have ha : t + 1 ≤ 1 + η := by omega
+      have hb : 1 + 2 ≤ t + 1 := by omega
+      refine ⟨1, ha, hb, ?_⟩
+      simp only [SM9]; rw [if_pos (by omega : (1 : ℕ) ≤ 1), mem_H10]; omega
+  · -- t ≥ η + 1
+    by_cases h2 : u.val ≤ 2
+    · refine Or.inr (Or.inl ?_)
+      simp only [SM9]; rw [if_neg (by omega : ¬ t + 1 ≤ η)]
+      have : u ∈ ({0, 1, 2} : Finset V9) := mem_A012 u h2
+      exact this
+    · left; simp only [SM9]; rw [if_neg hle1, if_neg hηt, mem_H38]
+      exact ⟨by omega, by omega⟩
+
+/-! ### `EtaSleepy τ` for `τ < η` -/
+
+/-- Every honest set is contained in `{1,…,10}` (no adversary `0`). -/
+theorem H_sub_all {η : ℕ} (u' : ℕ) :
+    (SM9 η).H u' ⊆ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) := by
+  simp only [SM9]
+  split_ifs <;> decide
+
+/-- `Hwindow` never contains the adversary. -/
+theorem Hwindow_sub_all {η τ : ℕ} (s : ℕ) :
+    (SM9 η).Hwindow τ s ⊆ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) := by
+  intro v hv
+  rw [SleepyModel.mem_Hwindow] at hv
+  obtain ⟨u', _, _, hvu⟩ := hv
+  exact H_sub_all u' hvu
+
+/-- At the reorg slot, `Hwindow τ (η+1) ⊆ {1,…,6}`: because `τ < η`, the window
+`[η+1−τ, η−1] ⊆ [2, η−1]` never reaches slot 1 where `V3` last voted. -/
+private theorem reorg_window_bound {u' η τ : ℕ} (h1 : η + 1 ≤ u' + τ)
+    (h2 : u' + 2 ≤ η + 1) (hτ : τ < η) : ¬ u' ≤ 1 ∧ u' ≤ η :=
+  ⟨by omega, by omega⟩
+
+theorem Hwindow_reorg_sub {η τ : ℕ} (hη : 2 ≤ η) (hτ : τ < η) :
+    (SM9 η).Hwindow τ (η + 1) ⊆ ({1, 2, 3, 4, 5, 6} : Finset V9) := by
+  intro v hv
+  rw [SleepyModel.mem_Hwindow] at hv
+  obtain ⟨u', hu1, hu2, hvu⟩ := hv
+  obtain ⟨hb1, hb2⟩ := reorg_window_bound hu1 hu2 hτ
+  simp only [SM9] at hvu
+  rw [if_neg hb1, if_pos hb2] at hvu
+  exact hvu
+
+theorem SM9_EtaSleepy {η τ : ℕ} (hη : 2 ≤ η) (hτ1 : 1 ≤ τ) (hτ : τ < η) :
+    (SM9 η).EtaSleepy τ := by
+  intro t
+  by_cases hteq : t = η
+  · -- reorg slot: A = {0,1,2}, Hwindow ⊆ {1-6} = H_η, so Hwindow \ H_η = ∅
+    rw [hteq]
+    have hn1 : ¬ η ≤ 1 := by omega
+    have hnA : ¬ η + 1 ≤ η := by omega
+    have hHt : (SM9 η).H η = ({1, 2, 3, 4, 5, 6} : Finset V9) := by
+      simp only [SM9]; rw [if_neg hn1, if_pos le_rfl]
+    have hA : (SM9 η).A (η + 1) = ({0, 1, 2} : Finset V9) := by
+      simp only [SM9]; rw [if_neg hnA]
+    have hsub : (SM9 η).A (η + 1) ∪ ((SM9 η).Hwindow τ (η + 1) \ (SM9 η).H η) ⊆
+        ({0, 1, 2} : Finset V9) := by
+      rw [hA, hHt]
+      intro x hx
+      rw [Finset.mem_union] at hx
+      rcases hx with hx | hx
+      · exact hx
+      · rw [Finset.mem_sdiff] at hx
+        exact absurd (Hwindow_reorg_sub hη hτ hx.1) hx.2
+    calc ((SM9 η).A (η + 1) ∪ ((SM9 η).Hwindow τ (η + 1) \ (SM9 η).H η)).card
+        ≤ ({0, 1, 2} : Finset V9).card := Finset.card_le_card hsub
+      _ < ({1, 2, 3, 4, 5, 6} : Finset V9).card := by decide
+      _ = ((SM9 η).H η).card := by rw [hHt]
+  · -- other slots: Hwindow ⊆ {1-10}, bound by A ∪ ({1-10} \ H_t)
+    have hsub : (SM9 η).A (t + 1) ∪ ((SM9 η).Hwindow τ (t + 1) \ (SM9 η).H t) ⊆
+        (SM9 η).A (t + 1) ∪ (({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) \ (SM9 η).H t) := by
+      apply Finset.union_subset_union_right
+      exact Finset.sdiff_subset_sdiff (Hwindow_sub_all _) (Finset.Subset.refl _)
+    refine lt_of_le_of_lt (Finset.card_le_card hsub) ?_
+    by_cases hle1 : t ≤ 1
+    · have ha1 : t + 1 ≤ η := le_trans (Nat.succ_le_succ hle1) hη
+      rw [show (SM9 η).A (t + 1) = ({0} : Finset V9) by
+          simp only [SM9]; rw [if_pos ha1],
+        show (SM9 η).H t = ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) by
+          simp only [SM9]; rw [if_pos hle1]]
+      decide
+    · by_cases hηt : t ≤ η
+      · have ha1 : t + 1 ≤ η := Nat.succ_le_of_lt (Nat.lt_of_le_of_ne hηt hteq)
+        rw [show (SM9 η).A (t + 1) = ({0} : Finset V9) by
+            simp only [SM9]; rw [if_pos ha1],
+          show (SM9 η).H t = ({1, 2, 3, 4, 5, 6} : Finset V9) by
+            simp only [SM9]; rw [if_neg hle1, if_pos hηt]]
+        decide
+      · have hnA : ¬ t + 1 ≤ η := Nat.not_le.mpr (Nat.lt_succ_of_lt (Nat.lt_of_not_le hηt))
+        rw [show (SM9 η).A (t + 1) = ({0, 1, 2} : Finset V9) by
+            simp only [SM9]; rw [if_neg hnA],
+          show (SM9 η).H t = ({3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) by
+            simp only [SM9]; rw [if_neg hle1, if_neg hηt]]
+        decide
+
+/-! ## The `RLMDGhostModel` and the theorem -/
+
+theorem E9_hchAt {η : ℕ} {u : V9} {s : Slot} {r : Round} (_ : (E9 η).active u r)
+    (hr : r = (E9 η).slotStart s ∨ r = (E9 η).voteRound s) :
+    (E9 η).chAt u r = (E9 η).FC (effV η u (r / 3)) s := by
+  have hrs : r / 3 = s := by
+    rcases hr with h | h
+    · rw [h, E9_slotStart]; exact div3_mul s
+    · rw [h, E9_voteRound]; exact div3_mul_add s
+  show fcV (effV η u (r / 3)) η (r / 3) = fcV (effV η u (r / 3)) η s
+  rw [hrs]
+
+/-- The witness satisfies the fully synchronous RLMD-GHOST interface. -/
+noncomputable def E9_model {η : ℕ} (hη : 2 ≤ η) : RLMDGhostModel (E9 η) (SM9 η) η where
+  toRLMDGhostBase :=
+    witnessBase (E9 η) η (fun _ _ => rfl) (fun u r => effV η u (r / 3)) E9_hchAt
+  honest_vote_counted := by
+    intro v t r _ hr u hu
+    have hrs : r / 3 = t + 1 := by
+      rcases hr with h | h
+      · rw [h, E9_slotStart]; exact div3_mul _
+      · rw [h, E9_voteRound]; exact div3_mul_add _
+    show (∃ b, voteOfV (effV η v (r / 3)) η (t + 1) u = some b ∧ _) ∨
+      (voteOfV (effV η v (r / 3)) η (t + 1) u = none ∧ _)
+    rw [hrs]
+    exact E9_hvc hη u hu
+  counted_from_window := by
+    intro v t r _ hr u b _
+    have hrs : r / 3 = t + 1 := by
+      rcases hr with h | h
+      · rw [h, E9_slotStart]; exact div3_mul _
+      · rw [h, E9_voteRound]; exact div3_mul_add _
+    exact E9_cfw_cover hη t u
+
+/-- **Theorem 9.** For every `η ≥ 2` and every `τ` with `1 ≤ τ < η`, there is an
+`η`-instantiated RLMD-GHOST execution (satisfying the propose-vote-merge `Spec`
+and the fully synchronous `RLMDGhostModel`) that is `τ`-compliant
+(`τ`-sleepy) yet does **not** satisfy reorg resilience: the honest proposal of
+the pivot slot 2 is reorged out at slot `η + 1`. Hence RLMD-GHOST is not
+`τ`-reorg-resilient for any `1 ≤ τ < η`. -/
+theorem theorem9 {η : ℕ} (hη : 2 ≤ η) {τ : ℕ} (hτ1 : 1 ≤ τ) (hτ : τ < η) :
+    ∃ (E : Execution Blk V9 (Vw V9)) (SM : SleepyModel E),
+      Spec E ∧ Nonempty (RLMDGhostModel E SM η) ∧ SM.EtaSleepy τ ∧ ¬ ReorgResilient E :=
+  ⟨E9 η, SM9 η, E9_spec hη, ⟨E9_model hη⟩, SM9_EtaSleepy hη hτ1 hτ,
+    E9_not_reorgResilient hη⟩
+
 end Tightness
 
 end RLMDGhost
