@@ -590,6 +590,52 @@ theorem SM9_EtaSleepy {η τ : ℕ} (hη : 2 ≤ η) (hτ1 : 1 ≤ τ) (hτ : τ
             simp only [SM9]; rw [if_neg hle1, if_neg hηt]]
         decide
 
+/-! ## The `RLMDGhostModel` and the theorem -/
+
+theorem E9_hchAt {η : ℕ} {u : V9} {s : Slot} {r : Round} (_ : (E9 η).active u r)
+    (hr : r = (E9 η).slotStart s ∨ r = (E9 η).voteRound s) :
+    (E9 η).chAt u r = (E9 η).FC (effV η u (r / 3)) s := by
+  have hrs : r / 3 = s := by
+    rcases hr with h | h
+    · rw [h, E9_slotStart]; exact div3_mul s
+    · rw [h, E9_voteRound]; exact div3_mul_add s
+  show fcV (effV η u (r / 3)) η (r / 3) = fcV (effV η u (r / 3)) η s
+  rw [hrs]
+
+/-- The witness satisfies the fully synchronous RLMD-GHOST interface. -/
+noncomputable def E9_model {η : ℕ} (hη : 2 ≤ η) : RLMDGhostModel (E9 η) (SM9 η) η where
+  toRLMDGhostBase :=
+    witnessBase (E9 η) η (fun _ _ => rfl) (fun u r => effV η u (r / 3)) E9_hchAt
+  honest_vote_counted := by
+    intro v t r _ hr u hu
+    have hrs : r / 3 = t + 1 := by
+      rcases hr with h | h
+      · rw [h, E9_slotStart]; exact div3_mul _
+      · rw [h, E9_voteRound]; exact div3_mul_add _
+    show (∃ b, voteOfV (effV η v (r / 3)) η (t + 1) u = some b ∧ _) ∨
+      (voteOfV (effV η v (r / 3)) η (t + 1) u = none ∧ _)
+    rw [hrs]
+    exact E9_hvc hη u hu
+  counted_from_window := by
+    intro v t r _ hr u b _
+    have hrs : r / 3 = t + 1 := by
+      rcases hr with h | h
+      · rw [h, E9_slotStart]; exact div3_mul _
+      · rw [h, E9_voteRound]; exact div3_mul_add _
+    exact E9_cfw_cover hη t u
+
+/-- **Theorem 9.** For every `η ≥ 2` and every `τ` with `1 ≤ τ < η`, there is an
+`η`-instantiated RLMD-GHOST execution (satisfying the propose-vote-merge `Spec`
+and the fully synchronous `RLMDGhostModel`) that is `τ`-compliant
+(`τ`-sleepy) yet does **not** satisfy reorg resilience: the honest proposal of
+the pivot slot 2 is reorged out at slot `η + 1`. Hence RLMD-GHOST is not
+`τ`-reorg-resilient for any `1 ≤ τ < η`. -/
+theorem theorem9 {η : ℕ} (hη : 2 ≤ η) {τ : ℕ} (hτ1 : 1 ≤ τ) (hτ : τ < η) :
+    ∃ (E : Execution Blk V9 (Vw V9)) (SM : SleepyModel E),
+      Spec E ∧ Nonempty (RLMDGhostModel E SM η) ∧ SM.EtaSleepy τ ∧ ¬ ReorgResilient E :=
+  ⟨E9 η, SM9 η, E9_spec hη, ⟨E9_model hη⟩, SM9_EtaSleepy hη hτ1 hτ,
+    E9_not_reorgResilient hη⟩
+
 end Tightness
 
 end RLMDGhost
