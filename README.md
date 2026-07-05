@@ -26,6 +26,26 @@ resilience to bounded asynchrony. Results are proven in the paper's
 > the notes reference (SHA-256
 > `3e328cdccd6c4150a35f19e89942a97dbc0714226eb108ea9fa6fd7bd293f7fd`).
 
+## Lean 4 formalization
+
+The Lean project lives in `RLMDGhost/` (library root `RLMDGhost.lean`), built
+with Lake against Mathlib (toolchain pinned in `lean-toolchain`):
+
+```sh
+lake exe cache get   # fetch the Mathlib build cache
+lake build
+```
+
+Proof discipline, the barrier decisions, and the statement dependency DAG are
+documented in `docs/formalization-strategy.md`. No `sorry` is ever used; the
+only declared axiom is the probabilistic pivot-slot fact of Lemma 2
+(`RLMDGhost/Axioms.lean`, Barrier 1), threaded as a hypothesis into its
+dependents.
+
+Statement coverage so far — **Track A** (§3.6, abstract propose-vote-merge
+framework): Lemma 1, Lemma 2 (axiom), Proposition 1, Theorems 1–2, under
+`RLMDGhost/ProposeVoteMerge/`.
+
 ## Contents
 
 - `notes/paper-statements.md` — every numbered statement from the paper, each
