@@ -275,6 +275,70 @@ theorem E11_not_asynchronyResilient {η : ℕ} (hη : 2 ≤ η) (SM : SleepyMode
   rw [hch] at hle
   exact absurd hle (by decide)
 
+/-! ## Compliance and the theorem -/
+
+/-- The sleepy model: `v1` (index 1) always active; `v0` (index 0) active up to
+the pivot slot 2 then asleep through the tpa, waking at slot `η + 3`; `v2`
+(index 2) the sleepy validator, waking at slot `η + 2`. All honest (`A = ∅`). -/
+def SM11 (η : ℕ) : SleepyModel (E11 η) where
+  H t := if t ≤ 2 then {0, 1} else if t ≤ η + 1 then {1}
+    else if t ≤ η + 2 then {1, 2} else {0, 1, 2}
+  A _ := ∅
+  H_voter := fun _ => trivial
+
+/-- At the slots the compliance conditions constrain (`t ≤ 2` and `t ≥ η + 2`),
+`|univ \ H_t| < |H_t|`. -/
+theorem SM11_card {η : ℕ} (hη : 2 ≤ η) {t : ℕ} (h : t ≤ 2 ∨ η + 2 ≤ t) :
+    (Finset.univ \ (SM11 η).H t).card < ((SM11 η).H t).card := by
+  simp only [SM11]
+  rcases h with h | h
+  · rw [if_pos h]; decide
+  · rw [if_neg (by omega : ¬ t ≤ 2), if_neg (by omega : ¬ t ≤ η + 1)]
+    by_cases h2 : t ≤ η + 2
+    · rw [if_pos h2]; decide
+    · rw [if_neg h2]; decide
+
+/-- The empty-adversary union with a `univ`-bounded `Hwindow \ H_t` is bounded by
+`univ \ H_t`. -/
+theorem SM11_bound {η : ℕ} (s : ℕ) (t : ℕ) (Hw : Finset V3) :
+    ((SM11 η).A s ∪ (Hw \ (SM11 η).H t)).card ≤ (Finset.univ \ (SM11 η).H t).card := by
+  apply Finset.card_le_card
+  intro x hx
+  rw [Finset.mem_union] at hx
+  rcases hx with hx | hx
+  · exact absurd hx (by simp [SM11])
+  · rw [Finset.mem_sdiff] at hx ⊢
+    exact ⟨Finset.mem_univ x, hx.2⟩
+
+private theorem eso_bound {t η : ℕ} (h : t + 1 ≤ 2 ∨ η + 2 + 1 ≤ t + 1) :
+    t ≤ 2 ∨ η + 2 ≤ t := by omega
+
+theorem SM11_EtaSleepyOutside {η : ℕ} (hη : 2 ≤ η) :
+    (SM11 η).EtaSleepyOutside η 2 (η + 2) := by
+  intro t h
+  exact lt_of_le_of_lt (SM11_bound _ _ _) (SM11_card hη (eso_bound h))
+
+theorem SM11_TpaSleepy {η : ℕ} (hη : 2 ≤ η) :
+    (SM11 η).TpaSleepy η 2 (η + 2) := by
+  intro s _ _
+  have hA : (SM11 η).H 2 \ (SM11 η).A s = (SM11 η).H 2 := by simp [SM11]
+  rw [hA]
+  exact lt_of_le_of_lt (SM11_bound _ _ _) (SM11_card hη (Or.inl (le_refl 2)))
+
+/-- **Theorem 11.** For every finite `η ≥ 2`, RLMD-GHOST is not
+`(τ, π)`-asynchrony-resilient for `π = η`: there is an execution with the GHOST
+fork choice and a length-`η` tpa `(2, η + 2)`, satisfying the tpa sleepiness
+conditions, in which the honest proposal of the pivot slot 2 is reorged at the
+aware slot `η + 3`. (By the monotonicity `E_{τ,π} ⊇ E_{∞,η}`, the same witness
+refutes `(τ, π)`-asynchrony-resilience for all `τ > π ≥ η`.) -/
+theorem theorem11 {η : ℕ} (hη : 2 ≤ η) :
+    ∃ (E : Execution Blk V3 (Vw V3)) (SM : SleepyModel E) (t1 t2 : Slot),
+      Nonempty (RLMDGhostBase E) ∧ t2 = t1 + η ∧
+        SM.EtaSleepyOutside η t1 t2 ∧ SM.TpaSleepy η t1 t2 ∧
+        ¬ AsynchronyResilient E SM t1 t2 :=
+  ⟨E11 η, SM11 η, 2, η + 2, ⟨E11_base⟩, (Nat.add_comm 2 η).symm,
+    SM11_EtaSleepyOutside hη, SM11_TpaSleepy hη, E11_not_asynchronyResilient hη _⟩
+
 end Tightness
 
 end RLMDGhost
