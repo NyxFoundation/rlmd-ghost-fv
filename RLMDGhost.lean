@@ -9,6 +9,12 @@ import RLMDGhost.ProposeVoteMerge.Theorem1
 import RLMDGhost.ProposeVoteMerge.Theorem2
 import RLMDGhost.GhostInstantiations.Lemma3
 import RLMDGhost.GhostInstantiations.Theorem3
+import RLMDGhost.Model
+import RLMDGhost.Security.Basic
+import RLMDGhost.Security.Lemma4
+import RLMDGhost.Security.Theorem6
+import RLMDGhost.Security.Theorem7
+import RLMDGhost.Security.Theorem8
 
 /-!
 # RLMD-GHOST — Lean 4 formalization
