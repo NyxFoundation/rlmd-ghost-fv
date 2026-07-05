@@ -506,6 +506,90 @@ theorem E9_cfw_cover {η : ℕ} (hη : 2 ≤ η) (t : ℕ) (u : V9) :
     · left; simp only [SM9]; rw [if_neg hle1, if_neg hηt, mem_H38]
       exact ⟨by omega, by omega⟩
 
+/-! ### `EtaSleepy τ` for `τ < η` -/
+
+/-- Every honest set is contained in `{1,…,10}` (no adversary `0`). -/
+theorem H_sub_all {η : ℕ} (u' : ℕ) :
+    (SM9 η).H u' ⊆ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) := by
+  simp only [SM9]
+  split_ifs <;> decide
+
+/-- `Hwindow` never contains the adversary. -/
+theorem Hwindow_sub_all {η τ : ℕ} (s : ℕ) :
+    (SM9 η).Hwindow τ s ⊆ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) := by
+  intro v hv
+  rw [SleepyModel.mem_Hwindow] at hv
+  obtain ⟨u', _, _, hvu⟩ := hv
+  exact H_sub_all u' hvu
+
+/-- At the reorg slot, `Hwindow τ (η+1) ⊆ {1,…,6}`: because `τ < η`, the window
+`[η+1−τ, η−1] ⊆ [2, η−1]` never reaches slot 1 where `V3` last voted. -/
+private theorem reorg_window_bound {u' η τ : ℕ} (h1 : η + 1 ≤ u' + τ)
+    (h2 : u' + 2 ≤ η + 1) (hτ : τ < η) : ¬ u' ≤ 1 ∧ u' ≤ η :=
+  ⟨by omega, by omega⟩
+
+theorem Hwindow_reorg_sub {η τ : ℕ} (hη : 2 ≤ η) (hτ : τ < η) :
+    (SM9 η).Hwindow τ (η + 1) ⊆ ({1, 2, 3, 4, 5, 6} : Finset V9) := by
+  intro v hv
+  rw [SleepyModel.mem_Hwindow] at hv
+  obtain ⟨u', hu1, hu2, hvu⟩ := hv
+  obtain ⟨hb1, hb2⟩ := reorg_window_bound hu1 hu2 hτ
+  simp only [SM9] at hvu
+  rw [if_neg hb1, if_pos hb2] at hvu
+  exact hvu
+
+theorem SM9_EtaSleepy {η τ : ℕ} (hη : 2 ≤ η) (hτ1 : 1 ≤ τ) (hτ : τ < η) :
+    (SM9 η).EtaSleepy τ := by
+  intro t
+  by_cases hteq : t = η
+  · -- reorg slot: A = {0,1,2}, Hwindow ⊆ {1-6} = H_η, so Hwindow \ H_η = ∅
+    rw [hteq]
+    have hn1 : ¬ η ≤ 1 := by omega
+    have hnA : ¬ η + 1 ≤ η := by omega
+    have hHt : (SM9 η).H η = ({1, 2, 3, 4, 5, 6} : Finset V9) := by
+      simp only [SM9]; rw [if_neg hn1, if_pos le_rfl]
+    have hA : (SM9 η).A (η + 1) = ({0, 1, 2} : Finset V9) := by
+      simp only [SM9]; rw [if_neg hnA]
+    have hsub : (SM9 η).A (η + 1) ∪ ((SM9 η).Hwindow τ (η + 1) \ (SM9 η).H η) ⊆
+        ({0, 1, 2} : Finset V9) := by
+      rw [hA, hHt]
+      intro x hx
+      rw [Finset.mem_union] at hx
+      rcases hx with hx | hx
+      · exact hx
+      · rw [Finset.mem_sdiff] at hx
+        exact absurd (Hwindow_reorg_sub hη hτ hx.1) hx.2
+    calc ((SM9 η).A (η + 1) ∪ ((SM9 η).Hwindow τ (η + 1) \ (SM9 η).H η)).card
+        ≤ ({0, 1, 2} : Finset V9).card := Finset.card_le_card hsub
+      _ < ({1, 2, 3, 4, 5, 6} : Finset V9).card := by decide
+      _ = ((SM9 η).H η).card := by rw [hHt]
+  · -- other slots: Hwindow ⊆ {1-10}, bound by A ∪ ({1-10} \ H_t)
+    have hsub : (SM9 η).A (t + 1) ∪ ((SM9 η).Hwindow τ (t + 1) \ (SM9 η).H t) ⊆
+        (SM9 η).A (t + 1) ∪ (({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) \ (SM9 η).H t) := by
+      apply Finset.union_subset_union_right
+      exact Finset.sdiff_subset_sdiff (Hwindow_sub_all _) (Finset.Subset.refl _)
+    refine lt_of_le_of_lt (Finset.card_le_card hsub) ?_
+    by_cases hle1 : t ≤ 1
+    · have ha1 : t + 1 ≤ η := le_trans (Nat.succ_le_succ hle1) hη
+      rw [show (SM9 η).A (t + 1) = ({0} : Finset V9) by
+          simp only [SM9]; rw [if_pos ha1],
+        show (SM9 η).H t = ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) by
+          simp only [SM9]; rw [if_pos hle1]]
+      decide
+    · by_cases hηt : t ≤ η
+      · have ha1 : t + 1 ≤ η := Nat.succ_le_of_lt (Nat.lt_of_le_of_ne hηt hteq)
+        rw [show (SM9 η).A (t + 1) = ({0} : Finset V9) by
+            simp only [SM9]; rw [if_pos ha1],
+          show (SM9 η).H t = ({1, 2, 3, 4, 5, 6} : Finset V9) by
+            simp only [SM9]; rw [if_neg hle1, if_pos hηt]]
+        decide
+      · have hnA : ¬ t + 1 ≤ η := Nat.not_le.mpr (Nat.lt_succ_of_lt (Nat.lt_of_not_le hηt))
+        rw [show (SM9 η).A (t + 1) = ({0, 1, 2} : Finset V9) by
+            simp only [SM9]; rw [if_neg hnA],
+          show (SM9 η).H t = ({3, 4, 5, 6, 7, 8, 9, 10} : Finset V9) by
+            simp only [SM9]; rw [if_neg hle1, if_neg hηt]]
+        decide
+
 end Tightness
 
 end RLMDGhost
