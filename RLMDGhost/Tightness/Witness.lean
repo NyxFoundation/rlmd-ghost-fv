@@ -4,6 +4,11 @@ import Mathlib.Data.Finset.Max
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import RLMDGhost.Ghost
 
+set_option linter.unusedTactic false
+set_option linter.unusedSimpArgs false
+set_option linter.unreachableTactic false
+set_option linter.unusedSectionVars false
+
 /-!
 # Tightness witnesses — a concrete RLMD-GHOST view/filter/fork-choice model
 
@@ -194,7 +199,7 @@ def cand (T : Slot → Finset Blk) (η s : ℕ) : Finset ℕ :=
 
 theorem mem_cand {T : Slot → Finset Blk} {η s u' : ℕ} :
     u' ∈ cand T η s ↔ u' < s ∧ s ≤ u' + η ∧ T u' ≠ ∅ := by
-  simp [cand, Finset.mem_filter, Finset.mem_range, and_assoc]
+  simp only [cand, Finset.mem_filter, Finset.mem_range, and_assoc]
 
 /-- The counted vote extracted from one validator's table: at the latest
 in-window slot with votes seen, count the vote iff it is unique (equivocation
@@ -329,9 +334,9 @@ theorem card_votesV_eq (W : Vw V) (η s : ℕ) :
   | cons u t hu ih =>
     rw [Finset.sum_cons, Multiset.card_add, ih, Finset.filter_cons]
     rcases hb : voteOfV W η s u with - | b
-    · rw [if_neg (by simp [hb])]
+    · rw [if_neg (by simp)]
       simp
-    · rw [if_pos (by simp [hb]), Finset.card_cons]
+    · rw [if_pos (by simp), Finset.card_cons]
       simp [Nat.add_comm]
 
 /-- Bookkeeping for `RLMDGhostBase.count_le_weight`. -/
