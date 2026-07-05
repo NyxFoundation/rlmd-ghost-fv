@@ -56,6 +56,26 @@ theorem weight_le_weight_of_le {B₁ B₂ : Block} (h : B₁ ≤ B₂) (M : Mult
   exact Multiset.card_le_card
     (Multiset.monotone_filter_right M fun b (hb : B₂ ≤ b) => h.trans hb)
 
+@[simp] theorem weight_zero (B : Block) : weight B (0 : Multiset Block) = 0 := by
+  classical
+  rw [weight_def, Multiset.filter_zero, Multiset.card_zero]
+
+theorem weight_add (B : Block) (M N : Multiset Block) :
+    weight B (M + N) = weight B M + weight B N := by
+  classical
+  rw [weight_def, weight_def, weight_def, Multiset.filter_add, Multiset.card_add]
+
+theorem weight_singleton_of_le {B b : Block} (h : B ≤ b) :
+    weight B ({b} : Multiset Block) = 1 := by
+  classical
+  rw [weight_def, Multiset.filter_singleton, if_pos h, Multiset.card_singleton]
+
+theorem weight_singleton_of_not_le {B b : Block} (h : ¬B ≤ b) :
+    weight B ({b} : Multiset Block) = 0 := by
+  classical
+  rw [weight_def, Multiset.filter_singleton, if_neg h]
+  rfl
+
 /-- The subtrees of two conflicting blocks are vote-disjoint: no vote counts
 for both, so their weights sum to at most the total number of votes. -/
 theorem weight_add_weight_le {B' B'' : Block} (h : Conflicts B' B'')

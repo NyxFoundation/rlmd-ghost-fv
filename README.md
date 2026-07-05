@@ -50,6 +50,13 @@ Statement coverage so far:
   `RLMDGhost/GhostInstantiations/`, on the GHOST weight layer of
   `RLMDGhost/Ghost.lean`. The negative results (Theorems 4–5) additionally
   need concrete adversarial executions instantiating the interfaces.
+- **Track D** (App. A, tightness) — *in progress.* The reusable witness layer
+  (`RLMDGhost/Tightness/Witness.lean`) is complete: a concrete four-block tree,
+  views as known-blocks × vote-tables, an operational `FIL_rlmd`, and a GHOST
+  fork choice proven to satisfy `GhostSelects`, the §2 consistency property,
+  and the `RLMDGhostBase` counting bookkeeping. The three impossibility
+  theorems (9–11) instantiate this layer with the paper's adversarial
+  schedules — that construction work is ongoing.
 - **Track C** (§5.2, RLMD-GHOST security): Lemma 4 and Theorems 6–8, under
   `RLMDGhost/Security/`, on the generalized sleepy model of
   `RLMDGhost/Model.lean` (per-slot honest/corrupted `Finset`s, the

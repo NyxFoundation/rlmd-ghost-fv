@@ -15,6 +15,7 @@ import RLMDGhost.Security.Lemma4
 import RLMDGhost.Security.Theorem6
 import RLMDGhost.Security.Theorem7
 import RLMDGhost.Security.Theorem8
+import RLMDGhost.Tightness.Witness
 
 /-!
 # RLMD-GHOST — Lean 4 formalization
