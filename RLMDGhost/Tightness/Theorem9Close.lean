@@ -407,6 +407,69 @@ theorem chAtV_eq {η : ℕ} (hη : 2 ≤ η) (u : V9) {t : ℕ} :
         · rw [show t = η + 1 from by omega]; exact fcV_reorgF hη
         · exact fcV_tail hη h
 
+/-! ### Membership facts -/
+
+theorem mem_H10 : ∀ u : V9, (u ∈ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10} : Finset V9)) ↔ 1 ≤ u.val := by
+  decide
+theorem mem_H6 : ∀ u : V9,
+    (u ∈ ({1, 2, 3, 4, 5, 6} : Finset V9)) ↔ (1 ≤ u.val ∧ u.val ≤ 6) := by decide
+theorem mem_H38 : ∀ u : V9,
+    (u ∈ ({3, 4, 5, 6, 7, 8, 9, 10} : Finset V9)) ↔ (3 ≤ u.val ∧ u.val ≤ 10) := by decide
+theorem mem_A012 : ∀ u : V9, u.val ≤ 2 → u ∈ ({0, 1, 2} : Finset V9) := by decide
+
+/-! ### `honest_vote_counted` -/
+
+theorem fcV_viewF_mid {η t : ℕ} (hη : 2 ≤ η) (h2 : 2 ≤ t) (hηt : t ≤ η) :
+    fcV (viewF η) η t = bC := by
+  rcases Nat.lt_or_ge t 3 with h | h
+  · rw [show t = 2 from by omega]; exact fcV_pivotF hη
+  · exact fcV_mid h hηt
+
+theorem fcV_viewF_tail {η t : ℕ} (hη : 2 ≤ η) (h : η + 1 ≤ t) :
+    fcV (viewF η) η t = bB := by
+  rcases Nat.lt_or_ge t (η + 2) with h' | h'
+  · rw [show t = η + 1 from by omega]; exact fcV_reorgF hη
+  · exact fcV_tail hη h'
+
+theorem vF_mid {η t : ℕ} (u : V9) (hη : 2 ≤ η) (h2 : 2 ≤ t) (hηt : t ≤ η) :
+    (E9 η).votesFor u t bC :=
+  E9_votesFor_iff.mpr (by rw [effV_ge2 (by omega : 2 ≤ t)]; exact (fcV_viewF_mid hη h2 hηt).symm)
+
+theorem vF_tail {η t : ℕ} (u : V9) (hη : 2 ≤ η) (h : η + 1 ≤ t) : (E9 η).votesFor u t bB :=
+  E9_votesFor_iff.mpr (by rw [effV_ge2 (by omega : 2 ≤ t)]; exact (fcV_viewF_tail hη h).symm)
+
+/-- **`honest_vote_counted` for `E9`.** -/
+theorem E9_hvc {η : ℕ} (hη : 2 ≤ η) {v : V9} {t : ℕ} (u : V9) (hu : u ∈ (SM9 η).H t) :
+    (∃ b, voteOfV (effV η v (t + 1)) η (t + 1) u = some b ∧ (E9 η).votesFor u t b) ∨
+      (voteOfV (effV η v (t + 1)) η (t + 1) u = none ∧ u ∈ (SM9 η).A (t + 1)) := by
+  by_cases h0 : t = 0
+  · subst h0
+    exact Or.inl ⟨gen, voteOf_slot1 hη v u, E9_votesFor_iff.mpr (fcV_slot0 η u).symm⟩
+  rw [effV_ge2 (show 2 ≤ t + 1 by omega)]
+  simp only [SM9] at hu
+  by_cases h1 : t = 1
+  · subst h1
+    rw [if_pos (le_refl 1), mem_H10] at hu
+    by_cases h7 : 7 ≤ u.val
+    · exact Or.inl ⟨bB, voteOf_pivotF_v3 hη h7, E9_votesFor_iff.mpr (fcV_slot1_v3 hη h7).symm⟩
+    · exact Or.inl ⟨bA, voteOf_pivotF_v2 hη hu (Nat.lt_succ_iff.mp (not_le.mp h7)),
+        E9_votesFor_iff.mpr (fcV_slot1_v2 hη (Nat.lt_succ_iff.mp (not_le.mp h7))).symm⟩
+  rw [if_neg (by omega : ¬ t ≤ 1)] at hu
+  by_cases hηt : t ≤ η
+  · rw [if_pos hηt, mem_H6] at hu
+    by_cases hteq : t = η
+    · rw [hteq]
+      by_cases h12 : u.val ≤ 2
+      · refine Or.inr ⟨voteOf_reorgF_equiv hη hu.1 h12, ?_⟩
+        simp only [SM9]; rw [if_neg (by omega : ¬ η + 1 ≤ η)]; exact mem_A012 u h12
+      · exact Or.inl ⟨bC, voteOf_reorgF_v2 hη (by omega) hu.2,
+          vF_mid u hη (by omega) (le_refl η)⟩
+    · exact Or.inl ⟨bC, voteOf_mid_v2 (by omega) (by omega) hu.1 hu.2,
+        vF_mid u hη (by omega) hηt⟩
+  · rw [if_neg hηt, mem_H38] at hu
+    have hgt : η < t := Nat.lt_of_not_le hηt
+    exact Or.inl ⟨bB, voteOf_tail hη (by omega) u, vF_tail u hη (by omega)⟩
+
 end Tightness
 
 end RLMDGhost
