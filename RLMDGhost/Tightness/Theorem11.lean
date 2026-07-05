@@ -1,4 +1,5 @@
-import RLMDGhost.Tightness.Witness
+import RLMDGhost.Tightness.WitnessBase
+import RLMDGhost.Security.Theorem8
 
 /-!
 # Theorem 11 — RLMD-GHOST is not `(τ, π)`-asynchrony-resilient for `τ > π ≥ max(η, 2)`
@@ -210,6 +211,69 @@ theorem fcVB_reorg11 {η : ℕ} (hη : 2 ≤ η) : fcVB (view11 η) η (η + 3) 
 
 theorem not_bA_le_reorg11 {η : ℕ} (hη : 2 ≤ η) : ¬ bA ≤ fcVB (view11 η) η (η + 3) := by
   rw [fcVB_reorg11 hη]; decide
+
+/-! ## The execution and `¬ AsynchronyResilient` -/
+
+private theorem d3m (s : ℕ) : (3 * s) / 3 = s := by omega
+private theorem d3ma (s : ℕ) : (3 * s + 1) / 3 = s := by omega
+private theorem t31 (t : ℕ) : 3 * 1 * t + 1 = 3 * t + 1 := by omega
+private theorem t3 (s : ℕ) : 3 * 1 * s = 3 * s := by omega
+
+/-- The witnessing execution: `Δ = 1`, the GHOST fork choice `fcVB`, and every
+canonical chain the fork choice on the common view `view11`. -/
+noncomputable def E11 (η : ℕ) : Execution Blk V3 (Vw V3) where
+  Δ := 1
+  Δ_pos := one_pos
+  view _ _ := view11 η
+  active _ _ := True
+  pivot t := t = 2
+  proposerView _ := view11 η
+  proposal t := if t = 2 then bA else gen
+  blockView b := blockViewV V3 b
+  FC W s := fcVB W η s
+  votesFor u t b := b = fcVB (view11 η) η ((3 * 1 * t + 1) / 3)
+  chAt u r := fcVB (view11 η) η (r / 3)
+
+theorem E11_voteRound (η t : ℕ) : (E11 η).voteRound t = 3 * t + 1 := t31 t
+
+/-- Bundle the RLMD-GHOST fork-choice interface for `E11` (using `fcVB`). -/
+noncomputable def E11_base {η : ℕ} : RLMDGhostBase (E11 η) where
+  votes W s := votesV W η s
+  voteOf W s u := voteOfV W η s u
+  effView _ _ := view11 η
+  fc_ghost W s := fcVB_ghost W η s
+  chAt_fc := by
+    intro u s r _ hr
+    have hrs : r / 3 = s := by
+      rcases hr with h | h
+      · rw [h]; show (3 * 1 * s) / 3 = s; rw [t3 s]; exact d3m s
+      · rw [h]; show (3 * 1 * s + 1) / 3 = s; rw [t31 s]; exact d3ma s
+    show fcVB (view11 η) η (r / 3) = fcVB (view11 η) η s
+    rw [hrs]
+  count_le_weight W s B A h := count_le_weight_votesV W η s B A h
+  card_le_weight_add W s B A h := card_votesV_le_weight_add W η s B A h
+  weight_le_contrib W s B A h := weight_votesV_le_contrib W η s B A h
+
+/-- **`E11` reorgs the honest proposal.** For any sleepy model `SM` and any tpa
+`(2, η + 2)` (length `η`, so `π = η`), asynchrony resilience fails: slot 2 is a
+pivot proposing `bA`, yet at slot `η + 3` (an aware, i.e. active, round since
+`η + 3 > η + 2`) the canonical chain is `bB`, not a descendant of `bA`. -/
+theorem E11_not_asynchronyResilient {η : ℕ} (hη : 2 ≤ η) (SM : SleepyModel (E11 η)) :
+    ¬ AsynchronyResilient (E11 η) SM 2 (η + 2) := by
+  intro hAR
+  obtain ⟨hc1, -⟩ := hAR 2 (le_refl 2) rfl
+  have haw : Aware (E11 η) SM 2 (η + 2) (0 : V3) (η + 3) ((E11 η).voteRound (η + 3)) :=
+    ⟨trivial, fun _ h => absurd h (Nat.not_succ_le_self (η + 2))⟩
+  have h2s : 2 ≤ η + 3 := by omega
+  have hle := hc1 (η + 3) h2s 0 haw
+  have hprop : (E11 η).proposal 2 = bA := by show (if (2:Slot) = 2 then bA else gen) = bA; rfl
+  rw [hprop] at hle
+  -- chAt at slot η+3 = fcVB (view11) (η+3) = bB
+  have hch : (E11 η).chAt (0 : V3) ((E11 η).voteRound (η + 3)) = bB := by
+    show fcVB (view11 η) η (((E11 η).voteRound (η + 3)) / 3) = bB
+    rw [E11_voteRound, d3ma, fcVB_reorg11 hη]
+  rw [hch] at hle
+  exact absurd hle (by decide)
 
 end Tightness
 
