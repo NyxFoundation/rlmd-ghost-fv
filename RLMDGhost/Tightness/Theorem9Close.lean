@@ -64,6 +64,87 @@ theorem fcV_slot1_v3 {η : ℕ} (hη : 2 ≤ η) {u : V9} (h : 7 ≤ u.val) :
   unfold fcV
   rw [if_neg (fun h => okBlk_genbB_bA h.1), if_pos okBlk_genbB_bB]
 
+/-! ### The pivot fork choice over `viewF` (slot 2) -/
+
+theorem voteOf_pivotF_v2 {η : ℕ} (hη : 2 ≤ η) {u : V9} (h1 : 1 ≤ u.val) (h2 : u.val ≤ 6) :
+    voteOfV (viewF η) η 2 u = some bA := by
+  unfold voteOfV
+  refine voteOf1_at_prev (by omega) (by omega) ?_ (okBlk_bA_viewF η)
+  show tabF η u (2 - 1) = {bA}
+  rw [show (2 - 1) = 1 from rfl, tabF_eq_tab9 (u' := 1) (by omega) (by omega)]
+  unfold tab9
+  rw [if_neg (by omega : ¬ u.val = 0)]
+  by_cases hle2 : u.val ≤ 2
+  · rw [if_pos hle2, if_pos rfl]
+  · rw [if_neg hle2, if_pos h2, if_pos rfl]
+
+theorem voteOf_pivotF_v3 {η : ℕ} (hη : 2 ≤ η) {u : V9} (h : 7 ≤ u.val) :
+    voteOfV (viewF η) η 2 u = some bB := by
+  unfold voteOfV
+  refine voteOf1_at_prev (by omega) (by omega) ?_ (okBlk_bB_viewF η)
+  show tabF η u (2 - 1) = {bB}
+  rw [show (2 - 1) = 1 from rfl, tabF_eq_tab9 (u' := 1) (by omega) (by omega)]
+  unfold tab9
+  rw [if_neg (by omega : ¬ u.val = 0), if_neg (by omega : ¬ u.val ≤ 2),
+    if_neg (by omega : ¬ u.val ≤ 6), if_pos rfl]
+
+theorem voteOf_pivotF_adv {η : ℕ} (hη : 2 ≤ η) {u : V9} (h : u.val = 0) :
+    voteOfV (viewF η) η 2 u = some gen := by
+  unfold voteOfV
+  have hT0 : tabF η u 0 = {gen} := by unfold tabF; rw [if_neg (by omega), if_pos rfl]
+  have hmax : ∀ u' ∈ cand (tabF η u) η 2, u' ≤ 0 := by
+    intro u' hu'
+    rw [mem_cand] at hu'
+    obtain ⟨hlt, hwin, hne⟩ := hu'
+    by_contra hgt
+    apply hne
+    rw [tabF_eq_tab9 (u' := u') (by omega) (by omega)]
+    unfold tab9
+    rw [if_pos h, if_neg (by omega : ¬ u' = η)]
+  refine voteOf1_eq_some ?_ hmax hT0 (okBlk_gen_viewF η)
+  rw [mem_cand]; refine ⟨by omega, by omega, ?_⟩
+  show tabF η u 0 ≠ ∅; rw [hT0]; decide
+
+/-- The counted vote of each validator at the pivot slot 2. -/
+def expectedPivot (u : V9) : Option Blk :=
+  if u.val = 0 then some gen else if u.val ≤ 6 then some bA else some bB
+
+theorem voteOfV_eq_expectedPivot {η : ℕ} (hη : 2 ≤ η) (u : V9) :
+    voteOfV (viewF η) η 2 u = expectedPivot u := by
+  unfold expectedPivot
+  by_cases h0 : u.val = 0
+  · rw [if_pos h0, voteOf_pivotF_adv hη h0]
+  · rw [if_neg h0]
+    by_cases h6 : u.val ≤ 6
+    · rw [if_pos h6, voteOf_pivotF_v2 hη (by omega) h6]
+    · rw [if_neg h6, voteOf_pivotF_v3 hη (by omega)]
+
+theorem weight_bA_pivotF {η : ℕ} (hη : 2 ≤ η) :
+    weight bA (votesV (viewF η) η 2) = 6 := by
+  rw [weight_votesV_eq]
+  have : (Finset.univ.filter fun u : V9 =>
+      ∃ b, voteOfV (viewF η) η 2 u = some b ∧ bA ≤ b) =
+      Finset.univ.filter fun u : V9 => ∃ b, expectedPivot u = some b ∧ bA ≤ b := by
+    apply Finset.filter_congr; intro u _; rw [voteOfV_eq_expectedPivot hη u]
+  rw [this]; decide
+
+theorem weight_bB_pivotF {η : ℕ} (hη : 2 ≤ η) :
+    weight bB (votesV (viewF η) η 2) = 4 := by
+  rw [weight_votesV_eq]
+  have : (Finset.univ.filter fun u : V9 =>
+      ∃ b, voteOfV (viewF η) η 2 u = some b ∧ bB ≤ b) =
+      Finset.univ.filter fun u : V9 => ∃ b, expectedPivot u = some b ∧ bB ≤ b := by
+    apply Finset.filter_congr; intro u _; rw [voteOfV_eq_expectedPivot hη u]
+  rw [this]; decide
+
+/-- The honest chain `bC` at the pivot slot 2 over `viewF`. -/
+theorem fcV_pivotF {η : ℕ} (hη : 2 ≤ η) : fcV (viewF η) η 2 = bC := by
+  unfold fcV
+  rw [if_pos, if_pos (okBlk_bC_viewF η)]
+  refine ⟨okBlk_bA_viewF η, ?_⟩
+  rw [weight_bA_pivotF hη, weight_bB_pivotF hη]
+  rintro ⟨hlt, -⟩; omega
+
 /-! ## The execution -/
 
 private theorem div3_mul (s : ℕ) : (3 * s) / 3 = s := by omega
@@ -233,6 +314,42 @@ theorem E9_not_reorgResilient {η : ℕ} (hη : 2 ≤ η) : ¬ ReorgResilient (E
     rw [if_neg (Nat.succ_ne_zero η), if_neg (by omega : ¬ η + 1 = 1)]
   rw [hview, fcV_reorgF hη] at hle
   exact absurd hle (by decide)
+
+/-! ## The `Spec` instance -/
+
+theorem effV_ge2 {η : ℕ} {u : V9} {s : Slot} (hs : 2 ≤ s) : effV η u s = viewF η := by
+  unfold effV
+  rw [if_neg (fun h => by simp only [h] at hs; exact absurd hs (by decide)),
+    if_neg (fun h => by simp only [h] at hs; exact absurd hs (by decide))]
+
+/-- Merging the honest proposal `bC` into `viewF` leaves it unchanged (its
+history is already seen and it carries no votes). -/
+theorem viewF_sup_bC (η : ℕ) : viewF η ⊔ blockViewV V9 bC = viewF η := by
+  apply Prod.ext
+  · show (viewF η).1 ∪ (blockViewV V9 bC).1 = (viewF η).1
+    rw [viewF_fst]
+    show ({gen, bA, bB, bC} : Finset Blk) ∪ Blk.down bC = {gen, bA, bB, bC}
+    decide
+  · funext u u'
+    show (viewF η).2 u u' ∪ (blockViewV V9 bC).2 u u' = (viewF η).2 u u'
+    exact Finset.union_empty _
+
+theorem E9_spec {η : ℕ} (hη : 2 ≤ η) : Spec (E9 η) where
+  fc_consistency V t B h := fcV_consistency V η t B h
+  proposal_extends {t} hpivot := by
+    have ht : t = 2 := hpivot
+    subst ht
+    show fcV (viewF η) η 2 ≤ (if (2 : Slot) = 2 then bC else gen)
+    rw [if_pos rfl, fcV_pivotF hη]
+  voter_view_le {v t} _ _ := le_refl _
+  chAt_pivot_merge {v t} hpivot _ := by
+    have ht : t = 2 := hpivot
+    subst ht
+    rw [E9_chAt_slot η v (Or.inr rfl), effV_ge2 (le_refl 2)]
+    show fcV (viewF η) η 2 = fcV (viewF η ⊔ (viewF η ⊔ blockViewV V9 bC)) η 2
+    rw [viewF_sup_bC, sup_idem]
+  vote_chAt {v t} _ := rfl
+  vote_unique {v t b b'} _ hb hb' := hb.trans hb'.symm
 
 end Tightness
 
