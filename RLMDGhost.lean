@@ -16,6 +16,7 @@ import RLMDGhost.Security.Theorem6
 import RLMDGhost.Security.Theorem7
 import RLMDGhost.Security.Theorem8
 import RLMDGhost.Tightness.Witness
+import RLMDGhost.Tightness.Theorem9Core
 import RLMDGhost.FastConfirmation.Basic
 import RLMDGhost.FastConfirmation.Lemma5
 import RLMDGhost.FastConfirmation.Theorem12

@@ -56,7 +56,11 @@ Statement coverage so far:
   fork choice proven to satisfy `GhostSelects`, the §2 consistency property,
   and the `RLMDGhostBase` counting bookkeeping. The three impossibility
   theorems (9–11) instantiate this layer with the paper's adversarial
-  schedules — that construction work is ongoing.
+  schedules — that construction work is ongoing. The **reorg computation** at
+  the heart of Theorem 9 is verified in
+  `RLMDGhost/Tightness/Theorem9Core.lean` (`fcV_reorg` / `not_bC_le_reorg`): at
+  slot `η + 1`, the honest majority's RLMD fork choice outputs `bB` (weight 5)
+  over the honest proposal's `bA` branch (weight 4), for every `η ≥ 2`.
 - **Track E** (App. B, fast confirmations): Lemma 5 and Theorems 12–14, under
   `RLMDGhost/FastConfirmation/`, on the abstract fast-confirmation interface of
   `RLMDGhost/FastConfirmation/Basic.lean`. Reuses the Track C security stack:
