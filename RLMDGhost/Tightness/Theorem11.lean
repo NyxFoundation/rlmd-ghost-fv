@@ -313,28 +313,36 @@ theorem SM11_bound {η : ℕ} (s : ℕ) (t : ℕ) (Hw : Finset V3) :
 private theorem eso_bound {t η : ℕ} (h : t + 1 ≤ 2 ∨ η + 2 + 1 ≤ t + 1) :
     t ≤ 2 ∨ η + 2 ≤ t := by omega
 
-theorem SM11_EtaSleepyOutside {η : ℕ} (hη : 2 ≤ η) :
-    (SM11 η).EtaSleepyOutside η 2 (η + 2) := by
+/-- `SM11` satisfies the outside-tpa sleepiness at **every** window `W` — the
+finitization of `∞`-sleepiness (`SM11_bound` never inspects the window). -/
+theorem SM11_EtaSleepyOutside {η : ℕ} (hη : 2 ≤ η) (W : ℕ) :
+    (SM11 η).EtaSleepyOutside W 2 (η + 2) := by
   intro t h
   exact lt_of_le_of_lt (SM11_bound _ _ _) (SM11_card hη (eso_bound h))
 
-theorem SM11_TpaSleepy {η : ℕ} (hη : 2 ≤ η) :
-    (SM11 η).TpaSleepy η 2 (η + 2) := by
+/-- `SM11` satisfies the tpa sleepiness condition at **every** window `W`. -/
+theorem SM11_TpaSleepy {η : ℕ} (hη : 2 ≤ η) (W : ℕ) :
+    (SM11 η).TpaSleepy W 2 (η + 2) := by
   intro s _ _
   have hA : (SM11 η).H 2 \ (SM11 η).A s = (SM11 η).H 2 := by simp [SM11]
   rw [hA]
   exact lt_of_le_of_lt (SM11_bound _ _ _) (SM11_card hη (Or.inl (le_refl 2)))
 
 /-- **Theorem 11.** For every finite `η ≥ 2`, RLMD-GHOST is not
-`(τ, π)`-asynchrony-resilient for `π = η`: there is an execution with the GHOST
-fork choice and a length-`η` tpa `(2, η + 2)`, satisfying the tpa sleepiness
-conditions, in which the honest proposal of the pivot slot 2 is reorged at the
-aware slot `η + 3`. (By the monotonicity `E_{τ,π} ⊇ E_{∞,η}`, the same witness
-refutes `(τ, π)`-asynchrony-resilience for all `τ > π ≥ η`.) -/
+`(τ, π)`-asynchrony-resilient for any `τ > π ≥ η`: there is an execution with
+the GHOST fork choice and a length-`η` tpa `(2, η + 2)` — the shortest tpa of
+the paper's range — that satisfies both Definition 3 sleepiness conditions at
+**every** window `W` simultaneously (the finitization of the paper's
+`(∞, η)`-compliance: the `∀ W` conjuncts are exactly `∞`-sleepiness, since
+`Hwindow` is monotone in the window), and in which the honest proposal of the
+pivot slot 2 is reorged at the aware slot `η + 3`. Because the compliance
+classes `E_{τ,π}` are monotonically decreasing in `τ` and increasing in `π`, an
+`(∞, η)`-compliant witness lies in `E_{τ,π}` for every `τ > π ≥ η` — the
+paper's full range (`π ≥ max(η, 2)` given `hη`). -/
 theorem theorem11 {η : ℕ} (hη : 2 ≤ η) :
     ∃ (E : Execution Blk V3 (Vw V3)) (SM : SleepyModel E) (t1 t2 : Slot),
       Nonempty (RLMDGhostBase E) ∧ t2 = t1 + η ∧
-        SM.EtaSleepyOutside η t1 t2 ∧ SM.TpaSleepy η t1 t2 ∧
+        (∀ W : ℕ, SM.EtaSleepyOutside W t1 t2) ∧ (∀ W : ℕ, SM.TpaSleepy W t1 t2) ∧
         ¬ AsynchronyResilient E SM t1 t2 :=
   ⟨E11 η, SM11 η, 2, η + 2, ⟨E11_base⟩, (Nat.add_comm 2 η).symm,
     SM11_EtaSleepyOutside hη, SM11_TpaSleepy hη, E11_not_asynchronyResilient hη _⟩

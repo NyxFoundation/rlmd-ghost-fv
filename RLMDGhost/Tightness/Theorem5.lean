@@ -166,11 +166,14 @@ theorem SM5_bound (s t : ℕ) (Hw : Finset V3) :
 
 private theorem eso5_bound {t : ℕ} (h : t + 1 ≤ 2 ∨ 4 + 1 ≤ t + 1) : t ≤ 2 ∨ 4 ≤ t := by omega
 
-theorem SM5_EtaSleepyOutside : (SM5).EtaSleepyOutside 1 2 4 := by
+/-- `SM5` satisfies the outside-tpa sleepiness at **every** window `W` — the
+finitization of `∞`-sleepiness (`SM5_bound` never inspects the window). -/
+theorem SM5_EtaSleepyOutside (W : ℕ) : (SM5).EtaSleepyOutside W 2 4 := by
   intro t h
   exact lt_of_le_of_lt (SM5_bound _ _ _) (SM5_card (eso5_bound h))
 
-theorem SM5_TpaSleepy : (SM5).TpaSleepy 1 2 4 := by
+/-- `SM5` satisfies the tpa sleepiness condition at **every** window `W`. -/
+theorem SM5_TpaSleepy (W : ℕ) : (SM5).TpaSleepy W 2 4 := by
   intro s _ _
   have hA : (SM5).H 2 \ (SM5).A s = (SM5).H 2 := by simp [SM5]
   rw [hA]
@@ -193,15 +196,19 @@ theorem E5_not_asynchronyResilient : ¬ AsynchronyResilient E5 SM5 2 4 := by
   exact absurd hle (by decide)
 
 /-- **Theorem 5.** Goldfish (`η = 1`) is not `(τ, π)`-asynchrony-resilient for
-`π = 2`: there is an execution with the Goldfish GHOST-Eph fork choice and a
-length-2 tpa `(2, 4)`, satisfying the tpa sleepiness conditions, in which the
-honest proposal of the pivot slot 2 is reorged at the aware slot 5. (By
-`E_{τ,π} ⊇ E_{∞,2}`, the same witness refutes `(τ, π)`-asynchrony-resilience for
-all `τ > π ≥ 2`.) -/
+any `τ > π ≥ 2`: there is an execution with the Goldfish GHOST-Eph fork choice
+and a length-2 tpa `(2, 4)` — the shortest tpa of the paper's range — that
+satisfies both Definition 3 sleepiness conditions at **every** window `W`
+simultaneously (the finitization of the paper's `(∞, 2)`-compliance: the
+`∀ W` conjuncts are exactly `∞`-sleepiness, since `Hwindow` is monotone in the
+window), and in which the honest proposal of the pivot slot 2 is reorged at the
+aware slot 5. Because the compliance classes `E_{τ,π}` are monotonically
+decreasing in `τ` and increasing in `π`, an `(∞, 2)`-compliant witness lies in
+`E_{τ,π}` for every `τ > π ≥ 2`, which is the paper's full range. -/
 theorem theorem5 :
     ∃ (E : Execution Blk V3 (Vw V3)) (SM : SleepyModel E) (t1 t2 : Slot),
       Nonempty (RLMDGhostBase E) ∧ t2 = t1 + 2 ∧
-        SM.EtaSleepyOutside 1 t1 t2 ∧ SM.TpaSleepy 1 t1 t2 ∧
+        (∀ W : ℕ, SM.EtaSleepyOutside W t1 t2) ∧ (∀ W : ℕ, SM.TpaSleepy W t1 t2) ∧
         ¬ AsynchronyResilient E SM t1 t2 :=
   ⟨E5, SM5, 2, 4, ⟨E5_base⟩, rfl, SM5_EtaSleepyOutside, SM5_TpaSleepy,
     E5_not_asynchronyResilient⟩
