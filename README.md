@@ -37,41 +37,50 @@ lake build
 ```
 
 Proof discipline, the barrier decisions, and the statement dependency DAG are
-documented in `docs/formalization-strategy.md`. No `sorry` is ever used; the
-only declared axiom is the probabilistic pivot-slot fact of Lemma 2
-(`RLMDGhost/Axioms.lean`, Barrier 1), threaded as a hypothesis into its
-dependents.
+documented in `docs/formalization-strategy.md`. No `sorry` is ever used, and
+**no axiom is declared**: every statement is proved from Lean's core axioms
+alone, with external facts — the Lemma 2 pivot-slot good event
+(`PivotEveryWindow`, `RLMDGhost/Axioms.lean`) and the idealized-cryptography
+mechanics — threaded as explicit hypotheses. (An earlier `axiom lemma2` was
+removed after being shown inconsistent; see `RLMDGhost/Axioms.lean` and
+Barrier 1 of the strategy doc.)
 
-Statement coverage so far:
+Statement coverage — all 20 numbered statements are closed:
 
-- **Track A** (§3.6, abstract propose-vote-merge framework): Lemma 1, Lemma 2
-  (axiom), Proposition 1, Theorems 1–2, under `RLMDGhost/ProposeVoteMerge/`.
+- **Track A** (§3.6, abstract propose-vote-merge framework): Lemma 1,
+  Proposition 1, Theorems 1–2, under `RLMDGhost/ProposeVoteMerge/`; the Lemma 2
+  good event is defined in `RLMDGhost/Axioms.lean` and threaded as a premise.
 - **Track B** (§4, GHOST instantiations): Lemma 3 and Theorem 3, under
   `RLMDGhost/GhostInstantiations/`, on the GHOST weight layer of
-  `RLMDGhost/Ghost.lean`. The negative results (Theorems 4–5) additionally
-  need concrete adversarial executions instantiating the interfaces.
-- **Track D** (App. A, tightness) — *in progress.* The reusable witness layer
-  (`RLMDGhost/Tightness/Witness.lean`) is complete: a concrete four-block tree,
-  views as known-blocks × vote-tables, an operational `FIL_rlmd`, and a GHOST
-  fork choice proven to satisfy `GhostSelects`, the §2 consistency property,
-  and the `RLMDGhostBase` counting bookkeeping. The three impossibility
-  theorems (9–11) instantiate this layer with the paper's adversarial
-  schedules — that construction work is ongoing. The **reorg computation** at
-  the heart of Theorem 9 is verified in
-  `RLMDGhost/Tightness/Theorem9Core.lean` (`fcV_reorg` / `not_bC_le_reorg`): at
-  slot `η + 1`, the honest majority's RLMD fork choice outputs `bB` (weight 5)
-  over the honest proposal's `bA` branch (weight 4), for every `η ≥ 2`.
-- **Track E** (App. B, fast confirmations): Lemma 5 and Theorems 12–14, under
-  `RLMDGhost/FastConfirmation/`, on the abstract fast-confirmation interface of
-  `RLMDGhost/FastConfirmation/Basic.lean`. Reuses the Track C security stack:
-  Theorem 12 composes Lemma 5 with Lemma 4 through the shared reorg-resilience
-  induction, Theorem 13 reduces to Theorem 7, and Theorem 14 rests on
-  Lemma 1.
+  `RLMDGhost/Ghost.lean`.
 - **Track C** (§5.2, RLMD-GHOST security): Lemma 4 and Theorems 6–8, under
   `RLMDGhost/Security/`, on the generalized sleepy model of
   `RLMDGhost/Model.lean` (per-slot honest/corrupted `Finset`s, the
   `η`-sleepiness and `(η, η−1)`-compliance inequalities) and the abstract
   RLMD filter interface of `RLMDGhost/Security/Basic.lean`.
+- **Track D** (App. A + the §4 negative results, tightness): Theorems 4, 5, 9,
+  10, 11, under `RLMDGhost/Tightness/`, on the reusable witness layer
+  (`Witness.lean`/`WitnessBase.lean`): a concrete four-block tree, views as
+  known-blocks × vote-tables, an operational `FIL_rlmd`, and GHOST fork choices
+  proven to satisfy `GhostSelects` and the §2 consistency property. Theorem 9's
+  witness is a *fully certified* RLMD-GHOST run (`Spec` + `RLMDGhostModel`),
+  `τ`-compliant for every `τ < η`, reorged at slot `η + 1`; Theorem 10 draws
+  the dynamic-availability consequence. Theorem 4 is a per-`τ` witness family
+  for LMD-GHOST (full-history fork choice, corruption delayed past the
+  `τ`-window); Theorems 5 and 11 certify their tpa witnesses at **every**
+  sleepiness window simultaneously (the paper's `(∞, π)`-compliance).
+- **Track E** (App. B, fast confirmations): Lemma 5 and Theorems 12–14, under
+  `RLMDGhost/FastConfirmation/`. Theorem 12 composes Lemma 5 with Lemma 4
+  through the shared reorg-resilience induction; Theorem 13 *proves* the safety
+  of the combined κ-deep + fast rule by reduction to Theorems 12/6 and standard
+  safety, and inherits liveness from Theorem 7; Theorem 14 derives full honest
+  agreement from Lemma 1 at the pivot slot.
+- **Phase 2** (the probabilistic content of Lemma 2): `RLMDGhost/Phase2/` —
+  the product-Bernoulli proposer lottery, per-slot independence, the
+  `(1 − p)^κ` per-window miss bound, the union bound over a polynomial window
+  family, and negligibility of the failure probability. The identification of
+  the abstract lottery with `E.pivot` of an execution is the remaining,
+  documented Barrier-1 idealization.
 
 ## Contents
 
