@@ -40,5 +40,6 @@ GHOST* (D'Amato & Zanolini, arXiv:2302.11326, CSF 2024), following
 `docs/formalization-strategy.md`.
 
 Track A (§3.6, the abstract propose-vote-merge framework): Lemma 1,
-Lemma 2 (axiom, Barrier 1), Proposition 1, Theorem 1, Theorem 2.
+Lemma 2 (good event threaded as a hypothesis, Barrier 1; probabilistic content
+in `RLMDGhost.Phase2`), Proposition 1, Theorem 1, Theorem 2.
 -/

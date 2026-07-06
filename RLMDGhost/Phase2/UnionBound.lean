@@ -28,9 +28,20 @@ honest-and-active (probability `≥ p`). The coordinates are independent
   `⋃ w ∈ W, (w all-miss)` has measure `≤ (#W) · (1 − p)^κ` (union bound).
 * `pivotEveryWindow_fail_negligible` — the capstone: with `p ∈ (0, 1]` and a
   polynomially-bounded number of windows, the real-valued failure probability is
-  **negligible** in `κ`. This is Lemma 2's "w.o.p." fully realized: the union
-  bound is no longer a hypothesis but a theorem about the product-Bernoulli space,
-  fed into the negligibility core of `RLMDGhost.Phase2.Lemma2`.
+  **negligible** in `κ`. The union bound is no longer a hypothesis but a theorem
+  about the product-Bernoulli space, fed into the negligibility core of
+  `RLMDGhost.Phase2.Lemma2`.
+
+## Scope
+
+This development lives in the abstract lottery space `Fin T → Bool`. It proves
+the probabilistic content of the paper's proof of Lemma 2 — fairness ⇒
+per-window miss `(1 − p)^κ` ⇒ union bound ⇒ negligible failure — but it does
+**not** mention `Execution` or `E.pivot`: identifying the lottery coordinates
+with the pivot predicate of a protocol execution (probabilistic semantics for
+executions) is the remaining Barrier-1 idealization, documented in
+`RLMDGhost.Axioms`. Deterministic dependents thread `PivotEveryWindow` as a
+hypothesis instead.
 -/
 
 namespace RLMDGhost
@@ -98,17 +109,18 @@ theorem lot_union_bound (T : ℕ) (p : ℝ≥0) (hp : p ≤ 1) (W : Finset (Fins
     intro w hw; rw [lot_window T p hp w, hκ w hw]
   rw [Finset.sum_congr rfl hcongr, Finset.sum_const, nsmul_eq_mul]
 
-/-- **Lemma 2, fully realized (w.o.p.).** Let the honest-proposer probability be
-`p ∈ (0, 1]` and let the number of length-`κ` windows in the time horizon be
-polynomially bounded (`#(W κ) ≤ C · κ^d`). Then the real-valued failure
-probability of the pivot-slot good event — the measure, under the product-Bernoulli
-proposer lottery, of "some length-`κ` window misses entirely" — is **negligible**
-in `κ`.
+/-- **The probabilistic content of Lemma 2.** Let the honest-proposer
+probability be `p ∈ (0, 1]` and let the number of length-`κ` windows in the
+time horizon be polynomially bounded (`#(W κ) ≤ C · κ^d`). Then the real-valued
+failure probability of the pivot-slot good event — the measure, under the
+product-Bernoulli proposer lottery, of "some length-`κ` window misses
+entirely" — is **negligible** in `κ`.
 
-This closes the loop of `RLMDGhost.Axioms.lemma2`: the union bound is now proved
-from the probability space (`lot_union_bound`) rather than assumed, and combined
-with the negligibility core (`pivotEveryWindow_failure_negligible`) it yields that
-`PivotEveryWindow` holds with overwhelming probability. -/
+The union bound is proved from the probability space (`lot_union_bound`) rather
+than assumed, and is combined with the negligibility core
+(`pivotEveryWindow_failure_negligible`). What remains outside the formalization
+is the identification of the abstract lottery with `E.pivot` of a protocol
+execution — the Barrier-1 idealization documented in `RLMDGhost.Axioms`. -/
 theorem pivotEveryWindow_fail_negligible {T : ℕ → ℕ} {p : ℝ≥0} {C : ℝ} {d : ℕ}
     (hp0 : 0 < p) (hp1 : p ≤ 1) (hC : 0 ≤ C)
     (W : ∀ κ, Finset (Finset (Fin (T κ))))
