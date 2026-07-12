@@ -1,11 +1,11 @@
-import RLMDGhost.Phase2.Lemma2
+import RLMDGhost.Probabilistic.Lemma2
 import Mathlib.Probability.ProbabilityMassFunction.Constructions
 import Mathlib.Probability.Independence.Basic
 
 /-!
-# Phase 2 — the measure-theoretic union bound for Lemma 2 (issue #21)
+# The measure-theoretic union bound for Lemma 2 (issue #21)
 
-`RLMDGhost.Phase2.Lemma2` reduces Lemma 2's "with overwhelming probability" to the
+`RLMDGhost.Probabilistic.Lemma2` reduces Lemma 2's "with overwhelming probability" to the
 union bound `|failProb κ| ≤ horizon κ * (1 − p)^κ`, which it threads as a
 hypothesis. This file **discharges that hypothesis** by constructing the
 underlying probability space and proving the union bound from independence — the
@@ -30,7 +30,7 @@ honest-and-active (probability `≥ p`). The coordinates are independent
   polynomially-bounded number of windows, the real-valued failure probability is
   **negligible** in `κ`. The union bound is no longer a hypothesis but a theorem
   about the product-Bernoulli space, fed into the negligibility core of
-  `RLMDGhost.Phase2.Lemma2`.
+  `RLMDGhost.Probabilistic.Lemma2`.
 
 ## Scope
 

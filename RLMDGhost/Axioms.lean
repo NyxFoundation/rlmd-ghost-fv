@@ -28,7 +28,7 @@ Lemma 2's content therefore lives in two sound places:
   `PivotEveryWindow E κ` as a premise and are fully proved ("good event ⇒
   security"). This matches the paper, whose security statements hold "with
   overwhelming probability" *because* they hold on the good event.
-* **`RLMDGhost.Phase2`** — the probabilistic content of the paper's proof of
+* **`RLMDGhost.Probabilistic`** — the probabilistic content of the paper's proof of
   Lemma 2, formalized over an abstract product-Bernoulli proposer lottery:
   per-slot independence (`lot_indep`), the per-window miss probability
   `(1 − p) ^ κ` (`lot_window`), the union bound over a window family
@@ -54,7 +54,7 @@ length `κ` contains at least one pivot slot.
 
 This is the paper's good event over an unbounded slot range; the paper works
 within a time horizon `Thor = poly(κ)`, over which the event holds w.o.p.
-(union bound, `RLMDGhost.Phase2`). Dependents thread this proposition as a
+(union bound, `RLMDGhost.Probabilistic`). Dependents thread this proposition as a
 hypothesis, so their statements are the deterministic "good event ⇒ security"
 conditionals. -/
 def PivotEveryWindow (E : Execution Block Validator View) (κ : ℕ) : Prop :=
