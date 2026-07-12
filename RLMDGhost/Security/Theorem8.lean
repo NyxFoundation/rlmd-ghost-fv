@@ -96,12 +96,17 @@ RLMD-GHOST interface: the synchronous delivery facts restricted to slots
 outside `(t1, t2 + 1]`, and the two tpa-specific facts of the paper's proof.
 
 * `tpa_vote_counted` — in the effective view of an *aware* validator at a
-  fork-choice round of a slot `s ∈ (t1, t2 + 1]`, each `u ∈ H_{t1}` has its
-  latest own honest vote (from some slot in `[t1, s−1]`) counted: `H_{t1}` was
-  awake at the `3∆t1 + 2∆` merge (Definition 3) so its slot-`t1` votes reached
-  every aware view (for `s = t2 + 1`, synchrony from slot `t2` delivers the
-  latest ones), and `t2 ≤ t1 + η − 1` keeps slot-`t1` votes unexpired; a
-  discounted equivocator must have been corrupted (Barrier 2 unforgeability).
+  fork-choice round of a slot `s ∈ (t1, t2 + 1]`, each `u ∈ H_{t1} \ A_s` has
+  its latest own honest vote (from some slot in `[t1, s−1]`) counted: `H_{t1}`
+  was awake at the `3∆t1 + 2∆` merge (Definition 3) so its slot-`t1` votes
+  reached every aware view (for `s = t2 + 1`, synchrony from slot `t2` delivers
+  the latest ones), `t2 ≤ t1 + η − 1` keeps slot-`t1` votes unexpired, and
+  members of `H_{t1} \ A_s` are not corrupted by round `3∆s + ∆`, hence not
+  equivocators (Barrier 2 unforgeability) — the paper's "all validators in
+  `Ht1 \ As` are not equivocators in `Vi`, therefore their latest votes in `Vi`
+  all count". Corrupted members of `H_{t1} ∩ A_s` are *not* constrained: the
+  adversary may broadcast fresh votes from them, and the counting places all
+  such votes on the `A_s` side of the Definition 3 inequality.
 * `tpa_from_window` — `η`-expiry: counted votes at slot `s` are from
   `[s−η, s−1]`, so their senders are corrupted or in `H_{s−η,s−1}`. -/
 structure TpaModel (E : Execution Block Validator View) (SM : SleepyModel E)
@@ -127,14 +132,14 @@ structure TpaModel (E : Execution Block Validator View) (SM : SleepyModel E)
       r = E.slotStart (t + 1) ∨ r = E.voteRound (t + 1) →
       ∀ u b, R.voteOf (R.effView v r) (t + 1) u = some b →
         u ∈ SM.H t ∨ u ∈ SM.A (t + 1) ∨ u ∈ SM.Hwindow η (t + 1)
-  /-- Delivery inside the tpa; see the structure docstring. -/
+  /-- Delivery inside the tpa, for the still-honest `H_{t1} \ A_s`; see the
+  structure docstring. -/
   tpa_vote_counted :
     ∀ {v : Validator} {s : Slot} {r : Round}, t1 < s → s ≤ t2 + 1 →
       Aware E SM t1 t2 v s r → (r = E.slotStart s ∨ r = E.voteRound s) →
-      ∀ u ∈ SM.H t1,
-        (∃ s' b, t1 ≤ s' ∧ s' + 1 ≤ s ∧ E.voter u s' ∧ E.votesFor u s' b ∧
-          R.voteOf (R.effView v r) s u = some b) ∨
-        (R.voteOf (R.effView v r) s u = none ∧ u ∈ SM.A s)
+      ∀ u ∈ SM.H t1, u ∉ SM.A s →
+        ∃ s' b, t1 ≤ s' ∧ s' + 1 ≤ s ∧ E.voter u s' ∧ E.votesFor u s' b ∧
+          R.voteOf (R.effView v r) s u = some b
   /-- Expiry provenance inside the tpa; see the structure docstring. -/
   tpa_from_window :
     ∀ {v : Validator} {s : Slot} {r : Round}, t1 < s → s ≤ t2 + 1 →
@@ -213,17 +218,16 @@ theorem theorem8 (T : TpaModel E SM η R t1 t2) {t : Slot} (TS : TpaSpec E t)
             · -- H_{t1} \ A_s members' counted latest votes extend B (IH)
               intro u hu
               rw [Finset.mem_sdiff] at hu
-              rcases T.tpa_vote_counted ht1s hst2 haw hrr u hu.1 with
-                ⟨s', b, hs'1, hs'2, hvoter, hvfor, hvoteOf⟩ | ⟨-, hA⟩
-              · refine Or.inl ⟨b, hvoteOf, ?_⟩
-                have hawu : Aware E SM t1 t2 u s' (E.voteRound s') :=
-                  ⟨hvoter, fun _ _ => hu.1⟩
-                have hchain := ih s' (Nat.lt_of_succ_le hs'2)
-                  (le_trans htt1 hs'1) _ u (Or.inr rfl) hawu
-                have : b = E.chAt u (E.voteRound s') :=
-                  TS.vote_unique hvoter hvfor (TS.vote_chAt hvoter)
-                rw [this]; exact hchain
-              · exact absurd hA hu.2
+              obtain ⟨s', b, hs'1, hs'2, hvoter, hvfor, hvoteOf⟩ :=
+                T.tpa_vote_counted ht1s hst2 haw hrr u hu.1 hu.2
+              refine Or.inl ⟨b, hvoteOf, ?_⟩
+              have hawu : Aware E SM t1 t2 u s' (E.voteRound s') :=
+                ⟨hvoter, fun _ _ => hu.1⟩
+              have hchain := ih s' (Nat.lt_of_succ_le hs'2)
+                (le_trans htt1 hs'1) _ u (Or.inr rfl) hawu
+              have : b = E.chAt u (E.voteRound s') :=
+                TS.vote_unique hvoter hvfor (TS.vote_chAt hvoter)
+              rw [this]; exact hchain
             · -- provenance during the tpa
               intro u b hb _
               rcases T.tpa_from_window ht1s hst2 haw hrr u b hb with hA | hW

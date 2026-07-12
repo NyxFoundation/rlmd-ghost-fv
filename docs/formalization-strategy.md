@@ -34,13 +34,16 @@ never the first.
 | Mechanism | Meaning | Soundness | Use in this project |
 |---|---|---|---|
 | `sorry` | Placeholder for an omitted proof; compiles but Lean warns and every downstream proof is tainted. | ✗ Not a proof; technical debt. | **Never.** |
-| `axiom` | A proposition *declared* true without proof — a deliberate, explicit assumption. | ✓ Sound relative to the assumption being a genuine idealized fact. | For idealized cryptography (signatures, proposer lottery) and for the probabilistic pivot-slot fact (Lemma 2, temporarily). |
-| Hypothesis threading | An external/idealized/probabilistic fact is taken as an explicit *premise* of the theorem. | ✓ The theorem is fully proved: "premise ⇒ conclusion". | Default for all deterministic reorg / availability / asynchrony reasoning. |
+| `axiom` | A proposition *declared* true without proof — a deliberate, explicit assumption. | ✓ Sound **only if** the assumption is true of *every* instantiation of its parameters. | **Currently none.** The Phase-1 `lemma2` axiom was removed as inconsistent (see Barrier 1); idealized cryptography enters as interface hypotheses instead. |
+| Hypothesis threading | An external/idealized/probabilistic fact is taken as an explicit *premise* of the theorem. | ✓ The theorem is fully proved: "premise ⇒ conclusion". | Default for everything: deterministic reorg / availability / asynchrony reasoning, the Lemma 2 good event, and the Barrier-2 crypto facts. |
 
 A deterministic theorem takes the probabilistic conclusion of Lemma 2 (and the
-crypto facts) as hypotheses and is then proved with **no `sorry` and no local
-axiom**. The probabilistic fact is isolated into Lemma 2, declared as `axiom` for
-now, and proved later in a dedicated Phase 2 issue.
+crypto facts) as hypotheses and is then proved with **no `sorry` and no
+axiom**. The probabilistic fact is isolated into Lemma 2, whose analytic and
+measure-theoretic content is proved in the Phase 2 files. A cautionary lesson
+(Barrier 1): an `axiom` quantifying over a structure with unconstrained fields
+is refutable by adversarial instantiation — the threading discipline is not
+just cleaner but *necessary* here.
 
 ## Barriers and decisions
 
@@ -52,14 +55,25 @@ union/Chernoff-style bound. Reorg resilience (Theorem 1) and the GHOST
 fork-choice arguments are deterministic *given* a pivot slot.
 
 **Decision.** Thread the pivot-slot good event as a hypothesis into the
-deterministic theorems (fully proved). Declare **Lemma 2** as an `axiom` (label
-`needs-axiom`); it closes at **Phase 1**. The measure-theoretic proof is tracked
+deterministic theorems (fully proved). The measure-theoretic proof is tracked
 in a separate **Phase 2** follow-up issue (label `phase2`) and never blocks
 dependents.
 
+**No `axiom lemma2`.** Phase 1 originally declared the good event as an axiom
+(`∀ E, fairness of `active` ⇒ `PivotEveryWindow E κ`). That axiom was found to
+be **inconsistent**: `Execution.pivot` is an unconstrained field with no tie to
+the proposer lottery, so the axiom could be instantiated at the Track D witness
+executions (e.g. `pivot t := t = 2`, `active ≡ True`) and `False` derived. It
+has been **removed** — no theorem ever depended on it (all dependents thread
+`PivotEveryWindow` as a premise), so no proof changed. A sound axiom of this
+shape cannot be stated over bare deterministic `Execution`s; the probabilistic
+content lives in Phase 2, and the bridge from the abstract lottery to `E.pivot`
+(probabilistic semantics for executions) is the remaining, documented
+Barrier-1 idealization.
+
 **Status (Phase 2 complete, issue #21 closed).** The probabilistic content of
-Lemma 2 is now formalized end-to-end, `sorry`-free and depending only on Lean
-core axioms:
+the paper's proof of Lemma 2 is formalized over an abstract product-Bernoulli
+lottery, `sorry`-free and depending only on Lean core axioms:
 
 - `RLMDGhost/Phase2/Lemma2.lean` — the analytic core: geometric decay `q^κ`
   (`q = 1 − p < 1`) is negligible, so a polynomial horizon times the per-window
@@ -73,8 +87,10 @@ core axioms:
   `pivotEveryWindow_fail_negligible`.
 
 The union bound is a theorem about the probability space rather than a threaded
-hypothesis. The `lemma2` axiom is retained only as the deterministic bridge that
-dependents thread around (none actually depend on it).
+hypothesis. What Phase 2 does *not* formalize — deliberately — is the
+identification of the lottery coordinates with `E.pivot` of an `Execution`;
+that identification is the Barrier-1 idealization, and dependents instead take
+the good event `PivotEveryWindow E κ` as an explicit premise.
 
 ### 2. Idealized cryptography
 
@@ -124,6 +140,19 @@ and discharging the property violation deterministically. No axiom; no Phase 2.
 These do not depend on the positive results (except the tightness chain
 Thm 10 ← Thm 9).
 
+**Compliance certificates must sit at the strongest class.** The compliance
+classes shrink as the sleepiness window grows (`E_{τ,π}` is monotonically
+decreasing in `τ`, increasing in `π`), so a negative result claimed "for all
+`τ`" needs its witness certified in the *strongest* relevant class — a
+witness certified only at the weakest window proves only that one instance.
+Concretely: Theorem 9/10 quantify over `τ < η` and certify `EtaSleepy τ` per
+`τ`; Theorem 4 is a *per-`τ` witness family* (the paper's "wait `N ≫ τ` slots"
+delay, `E4 τ` with corruption at slot `τ + 3`) certified at `EtaSleepy τ` for
+every `τ`, with LMD-GHOST rendered exactly by the full-history fork choice
+`fcV W s s`; Theorems 5/11 certify `EtaSleepyOutside`/`TpaSleepy` at **every**
+window simultaneously (`∀ W`), the finitization of the paper's
+`(∞, π)`-compliance.
+
 ## Track structure and dependency graph
 
 Five layers, matching the paper's organization.
@@ -144,7 +173,7 @@ contained adversarial construction):
 
 ```
 Lem1  ← {}                       (view-merge; protocol mechanics)
-Lem2  ← {[prob], [crypto]}        (axiom; pivot slot w.o.p.)
+Lem2  ← {[prob], [crypto]}        (good event threaded; pivot slot w.o.p., Phase 2)
 Prop1 ← {}                        (property; established per protocol — see Lem4)
 Thm1  ← {Lem1, Prop1}             (reorg resilience)
 Thm2  ← {Thm1, Lem2}              (dynamic availability)
@@ -170,8 +199,9 @@ Thm14 ← {Lem5}                    (liveness of fast confirmations)
 ```
 
 The graph is a **DAG** (no cyclic dependency); statements close in topological
-order. Only Lemma 2 is probabilistic, so it is the sole `needs-axiom` /
-`phase2` statement.
+order. Only Lemma 2 is probabilistic, so it is the sole `phase2` statement; its
+good event is threaded as a hypothesis into dependents (no axiom — see
+Barrier 1).
 
 ## Non-issue prerequisites (Lean scaffolding)
 
@@ -184,7 +214,7 @@ scaffolding assumed by every statement issue:
 | `RLMDGhost/Basic.lean` | Core types: `Validator`, `Block`/chain with prefix order `⪯`, votes/views, slots/rounds (`3∆`-slot structure), the canonical chain `ch^r_i`, the weight `w(B, M)`, and the `κ`-deep confirmation / security (`T_conf = 2κ`) notions. |
 | `RLMDGhost/Model.lean` | The generalized sleepy model: awake/active/aware sets per round, `τ`-/`η`-sleepiness, `η`-compliance, `(τ, π)`-compliance, and the `(η−1)`-tpa, all as a structure of hypotheses (Barrier 3). |
 | `RLMDGhost/Protocol.lean` | Abstract interface: propose-vote-merge + view-merge, the GHOST fork-choice, and the filter family `FIL_eq` / `FIL_lmd` / `FIL_η-exp` / `FIL_rlmd`, as a structure / typeclass (Barrier 4). |
-| `RLMDGhost/Axioms.lean` | Declared axioms: idealized cryptography (`SignatureUnforgeable`, proposer-lottery consistency/uniqueness — Barrier 2) and the probabilistic pivot-slot good event of Lemma 2 (Barrier 1), each with a source comment. |
+| `RLMDGhost/Axioms.lean` | The Lemma 2 good event `PivotEveryWindow` (Barrier 1) and the record of why no axiom is declared for it. Idealized cryptography (Barrier 2) enters as interface hypotheses where the equivocation vocabulary exists (`honest_vote_counted` in `RLMDGhost/Security/Basic.lean`). |
 
 Reference pattern for project layout: [`Koukyosyumei/PoL`](https://github.com/Koukyosyumei/PoL)
 (Apache-2.0, Lake, `Consensus/` module layout).

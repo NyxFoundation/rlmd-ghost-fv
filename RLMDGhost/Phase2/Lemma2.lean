@@ -4,9 +4,10 @@ import Mathlib.Analysis.SpecificLimits.Normed
 /-!
 # Phase 2 — the probabilistic core of Lemma 2 (issue #21)
 
-`RLMDGhost.Axioms.lemma2` declares the pivot-slot good event `PivotEveryWindow`
-as a Barrier-1 axiom: it holds *with overwhelming probability* (w.o.p.). This
-file discharges the analytic heart of that "w.o.p." — the fact that the
+The paper's Lemma 2 asserts that the pivot-slot good event `PivotEveryWindow`
+(`RLMDGhost.Axioms`) holds *with overwhelming probability* (w.o.p.);
+deterministic dependents thread the good event as a hypothesis (Barrier 1).
+This file discharges the analytic heart of that "w.o.p." — the fact that the
 union-bound failure probability of the proposer lottery is **negligible** in the
 security parameter `κ`.
 
@@ -182,10 +183,11 @@ let the number of windows in the time horizon be bounded by the degree-`d`
 polynomial `κ ↦ C · κ^d`. Then the union-bound failure probability of
 `PivotEveryWindow` is negligible in `κ`:
 
-`PivotEveryWindow` holds *with overwhelming probability* — which is exactly the
-content of the `RLMDGhost.Axioms.lemma2` axiom this Phase-2 development justifies.
-The measure-theoretic construction of the underlying probability space is threaded
-as the union bound `hbound`. -/
+the good event fails with negligible probability — the probabilistic content of
+the paper's Lemma 2, whose conclusion dependents thread as the `PivotEveryWindow`
+hypothesis. The measure-theoretic construction of the underlying probability
+space is threaded here as the union bound `hbound` and discharged by
+`RLMDGhost.Phase2.UnionBound`. -/
 theorem pivotEveryWindow_failure_negligible {failProb horizon : ℕ → ℝ}
     {p C : ℝ} {d : ℕ} (hp0 : 0 < p) (hp1 : p ≤ 1) (hC : 0 ≤ C)
     (hhor : ∀ κ, |horizon κ| ≤ C * (κ : ℝ) ^ d)
