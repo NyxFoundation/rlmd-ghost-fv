@@ -29,8 +29,8 @@ import RLMDGhost.FastConfirmation.Lemma5
 import RLMDGhost.FastConfirmation.Theorem12
 import RLMDGhost.FastConfirmation.Theorem13
 import RLMDGhost.FastConfirmation.Theorem14
-import RLMDGhost.Phase2.Lemma2
-import RLMDGhost.Phase2.UnionBound
+import RLMDGhost.Probabilistic.Lemma2
+import RLMDGhost.Probabilistic.UnionBound
 
 /-!
 # RLMD-GHOST — Lean 4 formalization
@@ -41,5 +41,5 @@ GHOST* (D'Amato & Zanolini, arXiv:2302.11326, CSF 2024), following
 
 Track A (§3.6, the abstract propose-vote-merge framework): Lemma 1,
 Lemma 2 (good event threaded as a hypothesis, Barrier 1; probabilistic content
-in `RLMDGhost.Phase2`), Proposition 1, Theorem 1, Theorem 2.
+in `RLMDGhost.Probabilistic`), Proposition 1, Theorem 1, Theorem 2.
 -/

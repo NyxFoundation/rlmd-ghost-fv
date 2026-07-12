@@ -75,7 +75,7 @@ Statement coverage — all 20 numbered statements are closed:
   of the combined κ-deep + fast rule by reduction to Theorems 12/6 and standard
   safety, and inherits liveness from Theorem 7; Theorem 14 derives full honest
   agreement from Lemma 1 at the pivot slot.
-- **Phase 2** (the probabilistic content of Lemma 2): `RLMDGhost/Phase2/` —
+- **Probabilistic core of Lemma 2**: `RLMDGhost/Probabilistic/` —
   the product-Bernoulli proposer lottery, per-slot independence, the
   `(1 − p)^κ` per-window miss bound, the union bound over a polynomial window
   family, and negligibility of the failure probability. The identification of

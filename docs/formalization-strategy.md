@@ -75,11 +75,11 @@ Barrier-1 idealization.
 the paper's proof of Lemma 2 is formalized over an abstract product-Bernoulli
 lottery, `sorry`-free and depending only on Lean core axioms:
 
-- `RLMDGhost/Phase2/Lemma2.lean` — the analytic core: geometric decay `q^κ`
+- `RLMDGhost/Probabilistic/Lemma2.lean` — the analytic core: geometric decay `q^κ`
   (`q = 1 − p < 1`) is negligible, so a polynomial horizon times the per-window
   miss factor is negligible (`pivotEveryWindow_failure_negligible`). The concrete
   bound used is a union bound, *not* a Chernoff bound, so core Mathlib suffices.
-- `RLMDGhost/Phase2/UnionBound.lean` — the probability space: the
+- `RLMDGhost/Probabilistic/UnionBound.lean` — the probability space: the
   product-Bernoulli proposer lottery (`Measure.pi`), independence of the per-slot
   draws (`iIndepFun_pi`), the per-window miss probability `(1 − p)^κ`
   (`iIndepFun.meas_iInter`), and the union bound `P(some window misses) ≤

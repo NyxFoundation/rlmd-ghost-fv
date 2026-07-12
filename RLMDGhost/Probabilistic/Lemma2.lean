@@ -2,7 +2,7 @@ import RLMDGhost.Axioms
 import Mathlib.Analysis.SpecificLimits.Normed
 
 /-!
-# Phase 2 — the probabilistic core of Lemma 2 (issue #21)
+# The probabilistic core of Lemma 2 (issue #21)
 
 The paper's Lemma 2 asserts that the pivot-slot good event `PivotEveryWindow`
 (`RLMDGhost.Axioms`) holds *with overwhelming probability* (w.o.p.);
@@ -187,7 +187,7 @@ the good event fails with negligible probability — the probabilistic content o
 the paper's Lemma 2, whose conclusion dependents thread as the `PivotEveryWindow`
 hypothesis. The measure-theoretic construction of the underlying probability
 space is threaded here as the union bound `hbound` and discharged by
-`RLMDGhost.Phase2.UnionBound`. -/
+`RLMDGhost.Probabilistic.UnionBound`. -/
 theorem pivotEveryWindow_failure_negligible {failProb horizon : ℕ → ℝ}
     {p C : ℝ} {d : ℕ} (hp0 : 0 < p) (hp1 : p ≤ 1) (hC : 0 ≤ C)
     (hhor : ∀ κ, |horizon κ| ≤ C * (κ : ℝ) ^ d)
